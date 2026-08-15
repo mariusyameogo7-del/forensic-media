@@ -37,7 +37,7 @@
     .form-group { margin-top: 20px; }
     .form-label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px; }
     textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; font-size: 14px; outline: none; font-family: inherit; resize: vertical; }
-    textarea:focus { border-color: #0284c7; ring: 2px solid #bae6fd; }
+    textarea:focus { border-color: #0284c7; }
     .btn-submit { width: 100%; background: #0f172a; color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: background 0.2s; }
     .btn-submit:hover { background: #1e293b; }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -51,7 +51,7 @@
     /* Progress Screen */
     .progress-box { text-align: center; padding: 30px; }
     .progress-bar-bg { width: 100%; height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin: 20px 0; }
-    .progress-bar-fill { height: 100%; background: #0284c7; width: 25%; transition: width 0.3s; }
+    .progress-bar-fill { height: 100%; background: #0284c7; width: 30%; transition: width 0.3s; }
     
     /* Results Screen */
     .res-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 20px; }
@@ -242,21 +242,18 @@
     var previewBox = document.getElementById("preview-box");
     var imagePreview = document.getElementById("image-preview");
 
-    // Click on dropzone opens picker
     dropArea.onclick = function(e) {
       if (e.target.tagName !== "BUTTON") {
         fileInput.click();
       }
     };
 
-    // File selected via input
     fileInput.onchange = function(e) {
       if (e.target.files && e.target.files[0]) {
         showFile(e.target.files[0]);
       }
     };
 
-    // Drag & Drop
     dropArea.ondragover = function(e) {
       e.preventDefault();
       dropArea.classList.add("active");
@@ -334,6 +331,8 @@
           }
           showScreen("screen-progress");
           document.getElementById("progress-public-id").textContent = data.public_id;
+          
+          // Poll and transition
           pollProgress(data.analysis_id);
         })
         .catch(function(err) {
@@ -349,18 +348,25 @@
       var token = localStorage.getItem("token_" + analysisId);
       var headers = token ? { "X-Analysis-Token": token } : {};
 
+      var count = 0;
       var interval = setInterval(function() {
+        count++;
         fetch("/api/v1/analyses/" + analysisId + "/progress", { headers: headers })
           .then(function(res) { return res.json(); })
           .then(function(data) {
-            document.getElementById("progress-bar-fill").style.width = data.progress_percent + "%";
-            if (data.status === "completed") {
+            document.getElementById("progress-bar-fill").style.width = Math.max(30, data.progress_percent || 0) + "%";
+            if (data.progress_percent >= 100 || data.status === "completed" || data.status === "failed" || count >= 2) {
               clearInterval(interval);
-              loadResult(analysisId);
+              setTimeout(function() {
+                loadResult(analysisId);
+              }, 400);
             }
           })
-          .catch(function() {});
-      }, 700);
+          .catch(function() {
+            clearInterval(interval);
+            loadResult(analysisId);
+          });
+      }, 500);
     }
 
     function loadResult(analysisId) {

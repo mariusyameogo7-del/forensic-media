@@ -62,8 +62,9 @@ async def create_analysis(
         user=current_user,
     )
 
-    # 3. Enqueue Celery Task / Fallback to direct synchronous execution
+    # 3. Direct processing for immediate response in standalone local dev
     try:
+        import celery
         process_analysis_task.delay(str(analysis.id))
     except Exception:
         orchestrator.process(db, analysis.id)
@@ -92,7 +93,7 @@ def get_analysis_progress(
     current_user: Optional[User] = Depends(get_current_user_optional),
     x_analysis_token: Optional[str] = Header(None, alias="X-Analysis-Token"),
 ):
-    analysis = analysis_service.get_analysis_or_404(db, analysis_id)
+    analysis = analysis_service.get_by_id_or_404(db, analysis_id)
     analysis_service.verify_access(db, analysis, user=current_user, raw_token=x_analysis_token)
 
     total_runs = len(analysis.engine_runs)
@@ -116,7 +117,7 @@ def get_analysis_progress(
         analysis_id=analysis.id,
         public_id=analysis.public_id,
         status=analysis.status,
-        progress_percent=progress_percent,
+        progress_percent=progress_percent if analysis.status != AnalysisStatus.COMPLETED else 100,
         current_step=None,
         steps=engine_items,
         created_at=analysis.created_at,

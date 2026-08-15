@@ -23,8 +23,12 @@ try:
 except ImportError:
     class DummyCelery:
         def task(self, *args, **kwargs):
+            is_bound = kwargs.get("bind", False)
             def decorator(f):
-                f.delay = lambda *a, **k: f(*a, **k)
+                if is_bound:
+                    f.delay = lambda *a, **k: f(None, *a, **k)
+                else:
+                    f.delay = lambda *a, **k: f(*a, **k)
                 return f
             return decorator
 
