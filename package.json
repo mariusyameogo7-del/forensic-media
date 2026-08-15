@@ -1,0 +1,14 @@
+{
+  "name": "forensic-media-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "cd apps/web && npm install && npm run build",
+    "start": "cd apps/web && npm run start",
+    "dev": "cd apps/web && npm run dev"
+  }
+}
