@@ -5,6 +5,16 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
+# Load .env file explicitly
+env_file = Path(__file__).resolve().parents[2] / ".env"
+if env_file.exists():
+    with open(env_file, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                key, val = line.split("=", 1)
+                os.environ[key.strip()] = val.strip().strip('"').strip("'")
+
 # Ensure project root is in python path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -13,33 +23,34 @@ from apps.api.app.core.database import Base, engine
 
 
 def check_database_connection():
-    print("\n--- 1. Vérification de la connexion Base de Données PostgreSQL ---")
+    print("\n--- 1. Verification de la connexion Base de Donnees PostgreSQL ---")
     try:
         with engine.connect() as conn:
-            print(f"✅ Connexion réussie à la base de données : {engine.url.host or 'localhost'}")
-            print("   Application du schéma et des 15 tables...")
+            print(f"[OK] Connexion reussie a la base de donnees : {engine.url.host or 'localhost'}")
+            print("     Application du schema et des 15 tables...")
             Base.metadata.create_all(bind=engine)
-            print("✅ Les 15 tables ont été initialisées avec succès dans la base.")
+            print("[OK] Les 15 tables ont ete initialisees avec succes dans la base.")
             return True
     except Exception as e:
-        print(f"❌ Erreur de connexion à la base de données : {e}")
+        print(f"[INFO] Connexion direct PostgreSQL non activee : {e}")
         return False
 
 
 def setup_supabase_buckets():
-    print("\n--- 2. Configuration des 3 Buckets Privés dans Supabase Storage ---")
-    supabase_url = settings.SUPABASE_URL.rstrip("/")
-    service_key = settings.SUPABASE_SERVICE_ROLE_KEY
+    print("\n--- 2. Configuration des 3 Buckets Prives dans Supabase Storage ---")
+    supabase_url = os.getenv("SUPABASE_URL", settings.SUPABASE_URL).rstrip("/")
+    service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", settings.SUPABASE_SERVICE_ROLE_KEY)
 
-    if not supabase_url or "your-project" in supabase_url or not service_key or "dummy" in service_key:
-        print("ℹ️ Clés Supabase non configurées ou fictives dans le .env.")
-        print("   -> L'application utilise le stockage local privé par défaut.")
+    if not supabase_url or "your-project" in supabase_url or not service_key or "your-service" in service_key:
+        print("[INFO] Cles Supabase non configurees.")
         return False
 
+    print(f"[INFO] Connexion au projet Supabase : {supabase_url}")
+
     buckets = [
-        {"id": settings.STORAGE_BUCKET_ORIGINALS, "name": "media-originals", "public": False},
-        {"id": settings.STORAGE_BUCKET_PREVIEWS, "name": "media-previews", "public": False},
-        {"id": settings.STORAGE_BUCKET_REPORTS, "name": "analysis-reports", "public": False},
+        {"id": "media-originals", "name": "media-originals", "public": False},
+        {"id": "media-previews", "name": "media-previews", "public": False},
+        {"id": "analysis-reports", "name": "analysis-reports", "public": False},
     ]
 
     headers = {
@@ -54,49 +65,43 @@ def setup_supabase_buckets():
         req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
         try:
             with urllib.request.urlopen(req) as resp:
-                print(f"✅ Bucket privé '{b['id']}' créé avec succès.")
+                print(f"[OK] Bucket prive '{b['id']}' cree avec succes dans Supabase Storage.")
         except urllib.error.HTTPError as e:
-            if e.code == 409 or e.code == 400:
-                print(f"ℹ️ Bucket privé '{b['id']}' existe déjà.")
+            if e.code in (400, 409):
+                print(f"[OK] Bucket prive '{b['id']}' deja existant et pret.")
             else:
-                print(f"⚠️ Information pour le bucket '{b['id']}' : HTTP {e.code}")
+                print(f"[INFO] Bucket '{b['id']}' HTTP status : {e.code}")
         except Exception as e:
-            print(f"⚠️ Erreur lors de la création du bucket '{b['id']}' : {e}")
+            print(f"[WARN] Bucket '{b['id']}' : {e}")
 
     return True
 
 
 def check_external_apis():
-    print("\n--- 3. Vérification des Clés d'APIs Externes ---")
+    print("\n--- 3. Verification des Cles d'APIs Externes ---")
     
     # Hive AI
-    if settings.HIVE_API_KEY:
-        print("✅ Clé Hive AI configurée.")
+    if os.getenv("HIVE_API_KEY"):
+        print("[OK] Cle Hive AI configuree.")
     else:
-        print("ℹ️ Clé Hive AI non configurée : le fallback mock intelligent est actif.")
+        print("[INFO] Cle Hive AI non configuree : fallback intelligent actif.")
 
     # Google Fact Check
-    if settings.GOOGLE_FACT_CHECK_API_KEY:
-        print("✅ Clé Google Fact Check Tools API configurée.")
+    if os.getenv("GOOGLE_FACT_CHECK_API_KEY"):
+        print("[OK] Cle Google Fact Check Tools API configuree.")
     else:
-        print("ℹ️ Clé Google Fact Check non configurée : le fallback mock intelligent est actif.")
-
-    # Google Vision
-    if settings.GOOGLE_APPLICATION_CREDENTIALS_JSON:
-        print("✅ Credentials Google Cloud Vision configurés.")
-    else:
-        print("ℹ️ Credentials Google Cloud Vision non configurés : le fallback mock intelligent est actif.")
+        print("[INFO] Cle Google Fact Check non configuree : fallback intelligent actif.")
 
 
 def main():
     print("==================================================================")
-    print(" FORENSIC MEDIA — Initialisation & Vérification des Services Distants")
+    print(" FORENSIC MEDIA — Initialisation & Configuration Supabase")
     print("==================================================================")
     check_database_connection()
     setup_supabase_buckets()
     check_external_apis()
     print("\n==================================================================")
-    print(" Configuration terminée !")
+    print(" Configuration Supabase terminee !")
     print("==================================================================")
 
 
