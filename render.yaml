@@ -1,0 +1,79 @@
+services:
+  # 1. FastAPI Web Service (Render Frankfurt)
+  - type: web
+    name: forensic-media-api
+    env: docker
+    region: fra
+    plan: standard
+    dockerfilePath: infra/docker/api.Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: false
+      - key: API_V1_STR
+        value: /api/v1
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: forensic-media-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: forensic-media-redis
+          property: connectionString
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: HIVE_API_KEY
+        sync: false
+      - key: GOOGLE_FACT_CHECK_API_KEY
+        sync: false
+
+  # 2. Celery Worker Service (Render Frankfurt)
+  - type: worker
+    name: forensic-media-worker
+    env: docker
+    region: fra
+    plan: standard
+    dockerfilePath: infra/docker/worker.Dockerfile
+    dockerContext: .
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: forensic-media-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: forensic-media-redis
+          property: connectionString
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: HIVE_API_KEY
+        sync: false
+      - key: GOOGLE_FACT_CHECK_API_KEY
+        sync: false
+
+# 3. Redis Instance (Render Frankfurt)
+redis:
+  - name: forensic-media-redis
+    region: fra
+    plan: free
+    maxmemoryPolicy: noeviction
+    ipAllowList: [] # Private access only
