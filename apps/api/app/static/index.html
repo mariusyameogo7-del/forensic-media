@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forensic Media — Plateforme africaine de vérification numérique</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .drag-active { border-color: #0284c7 !important; background-color: #f0f9ff !important; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col text-slate-900 bg-slate-50 antialiased">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('screen-upload')">
+        <div class="w-9 h-9 rounded-lg bg-sky-700 flex items-center justify-center text-white font-bold shadow-xs">
+          🛡️
+        </div>
+        <div>
+          <span class="font-bold text-slate-900 text-lg tracking-tight block leading-none">Forensic Media</span>
+          <span class="text-[10px] text-slate-500 font-medium tracking-wide uppercase">Vérification Numérique</span>
+        </div>
+      </div>
+      <nav class="flex items-center space-x-4">
+        <button onclick="showScreen('screen-upload')" class="text-sm font-medium text-slate-600 hover:text-sky-600 px-3 py-1.5 rounded-lg cursor-pointer">
+          Analyser
+        </button>
+        <button onclick="loadHistory()" class="text-sm font-medium text-slate-600 hover:text-sky-600 px-3 py-1.5 rounded-lg cursor-pointer">
+          Historique
+        </button>
+        <a href="/docs" target="_blank" class="text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 px-3 py-1.5 rounded-lg shadow-xs">
+          API Docs (/docs)
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- SCREEN 1 : ANALYSER UNE IMAGE -->
+    <section id="screen-upload" class="space-y-10">
+      <div class="text-center max-w-2xl mx-auto space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs font-semibold">
+          <span>✨ Plateforme africaine de vérification de médias numériques</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          Vérifiez une image avant de lui faire confiance
+        </h1>
+        <p class="text-base text-slate-600">
+          Analysez l’origine, l’intégrité et le contexte d’un média avant de le partager.
+        </p>
+      </div>
+
+      <!-- Dropzone Card -->
+      <div class="max-w-2xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+        
+        <!-- Interactive Drop Area -->
+        <div id="drop-area" class="border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-8 text-center cursor-pointer transition-all bg-slate-50/50 flex flex-col items-center justify-center min-h-[220px]">
+          <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="hidden">
+          
+          <div id="drop-prompt" class="space-y-3">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-2xl shadow-2xs">
+              📷
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-slate-900">Cliquez ou glissez-déposez une image ici</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Formats acceptés : JPG, PNG, WEBP (max 20 MiB)</p>
+            </div>
+            <button type="button" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-xs pointer-events-none">
+              Parcourir les fichiers
+            </button>
+          </div>
+
+          <!-- Selected File Preview Container -->
+          <div id="preview-container" class="hidden w-full flex flex-col items-center space-y-4">
+            <div class="relative max-h-64 rounded-xl overflow-hidden border border-slate-200 shadow-xs bg-slate-100">
+              <img id="image-preview" src="" alt="Aperçu" class="max-h-56 w-auto object-contain rounded-lg">
+            </div>
+            <div class="flex items-center justify-between w-full p-3 bg-sky-50 border border-sky-100 rounded-xl text-xs text-slate-700">
+              <div class="text-left truncate max-w-xs sm:max-w-md">
+                <strong id="file-name" class="block text-slate-900 font-semibold truncate">image.jpg</strong>
+                <span id="file-size" class="text-slate-500">0 KB</span>
+              </div>
+              <button type="button" onclick="clearSelectedFile(event)" class="text-rose-600 hover:text-rose-700 hover:underline font-semibold text-xs ml-3 shrink-0 cursor-pointer">
+                ✕ Retirer
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            Affirmation ou contexte accompagnant l&apos;image (facultatif)
+          </label>
+          <textarea id="claim-input" rows="2" placeholder="Ex : « Cette manifestation aurait eu lieu aujourd'hui à Ouagadougou. »" class="w-full text-sm rounded-xl border border-slate-300 p-3 text-slate-900 focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
+          <p class="text-[11px] text-slate-400 mt-1">Permet de confronter l'affirmation aux bases de fact-checking et aux contextes Web antérieurs.</p>
+        </div>
+
+        <button type="button" id="btn-submit" onclick="submitAnalysis()" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-sm cursor-pointer shadow-sm disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+          <span>Lancer l&apos;analyse</span>
+        </button>
+
+        <p class="text-center text-[11px] text-slate-400">
+          🔒 Privacy-first — Le média original est analysé et supprimé par défaut après traitement.
+        </p>
+      </div>
+
+      <!-- Quick Test Samples -->
+      <div class="max-w-2xl mx-auto pt-4 text-center space-y-3">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Ou tester avec des cas pré-analysés :</span>
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <button onclick="loadSampleCase('photo_manifestation_ouaga.jpg', 'Photo prise aujourd hui lors d une manifestation a Ouagadougou.')" class="px-3.5 py-2 bg-white border border-slate-200 hover:border-sky-500 rounded-xl text-xs font-medium text-slate-700 cursor-pointer shadow-2xs transition-colors">
+            📍 Cas 1 : Alerte Décontextualisation
+          </button>
+          <button onclick="loadSampleCase('photo_appareil_canon.jpg', 'Cliché authentique avec EXIF d appareil')" class="px-3.5 py-2 bg-white border border-slate-200 hover:border-sky-500 rounded-xl text-xs font-medium text-slate-700 cursor-pointer shadow-2xs transition-colors">
+            📷 Cas 2 : Cliché authentique avec EXIF
+          </button>
+          <button onclick="loadSampleCase('portrait_ia_synthetique.png', '')" class="px-3.5 py-2 bg-white border border-slate-200 hover:border-sky-500 rounded-xl text-xs font-medium text-slate-700 cursor-pointer shadow-2xs transition-colors">
+            🤖 Cas 3 : Illustration synthétique
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2 : PROGRESSION -->
+    <section id="screen-progress" class="hidden max-w-xl mx-auto py-12 space-y-6">
+      <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-xs text-center space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold animate-pulse">
+          <span>⏳ Analyse en cours d&apos;exécution...</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900">Vérification du média</h2>
+        <p class="text-xs text-slate-500">Identifiant public : <span id="progress-public-id" class="font-mono font-bold text-slate-800">AN-...</span></p>
+        
+        <div class="w-full bg-slate-100 rounded-full h-2.5 my-6 overflow-hidden">
+          <div id="progress-bar-fill" class="bg-sky-600 h-2.5 rounded-full transition-all duration-300" style="width: 35%"></div>
+        </div>
+
+        <div class="space-y-2 text-left text-xs bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <div class="flex items-center justify-between text-slate-700 font-medium">
+            <span>• Calcul des empreintes (SHA-256 & pHash)</span>
+            <span class="text-emerald-600 font-bold">✓</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-700 font-medium">
+            <span>• Extraction des métadonnées & C2PA</span>
+            <span class="text-emerald-600 font-bold">✓</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-700 font-medium">
+            <span>• Détection d'indices d'IA & Recherche Web</span>
+            <span class="text-emerald-600 font-bold">✓</span>
+          </div>
+          <div class="flex items-center justify-between text-slate-700 font-medium">
+            <span>• Synthèse explicable des 4 dimensions</span>
+            <span class="text-sky-600 font-bold animate-pulse">En cours...</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3 : RÉSULTAT -->
+    <section id="screen-result" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-xl font-bold text-slate-900">Résultat d&apos;analyse</h2>
+            <span id="res-public-id" class="font-mono text-xs px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 font-semibold text-slate-800">AN-...</span>
+          </div>
+          <p id="res-filename" class="text-xs text-slate-500 mt-0.5">photo.jpg</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="downloadReportPdfDirect()" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-lg shadow-xs cursor-pointer">
+            📄 Télécharger le rapport PDF
+          </button>
+          <button onclick="showScreen('screen-upload')" class="px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg cursor-pointer">
+            + Nouvelle analyse
+          </button>
+        </div>
+      </div>
+
+      <!-- Claim Banner -->
+      <div id="res-claim-box" class="hidden p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
+        <strong class="text-slate-500 uppercase tracking-wider block mb-1">Affirmation analysée :</strong>
+        <span id="res-claim-text" class="italic">« ... »</span>
+      </div>
+
+      <!-- Conclusion & 4 Indicators -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-6">
+        <div>
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">Conclusion synthétique</span>
+          <div id="res-conclusion-badge" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border">
+            <!-- Populated by JS -->
+          </div>
+          <p id="res-summary" class="text-sm text-slate-700 mt-3 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <!-- Populated by JS -->
+          </p>
+        </div>
+
+        <div>
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-3">Évaluation des 4 dimensions indépendantes</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="text-[11px] font-semibold text-slate-500 block uppercase mb-1">1. Provenance</span>
+              <span id="ind-provenance" class="text-xs font-bold text-slate-800">Inconnue</span>
+            </div>
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="text-[11px] font-semibold text-slate-500 block uppercase mb-1">2. Intégrité</span>
+              <span id="ind-integrity" class="text-xs font-bold text-slate-800">À examiner</span>
+            </div>
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="text-[11px] font-semibold text-slate-500 block uppercase mb-1">3. Indices IA</span>
+              <span id="ind-ai" class="text-xs font-bold text-slate-800">Faibles</span>
+            </div>
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="text-[11px] font-semibold text-slate-500 block uppercase mb-1">4. Contexte Web</span>
+              <span id="ind-context" class="text-xs font-bold text-slate-800">Cohérent</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evidence List -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
+        <h3 class="text-base font-bold text-slate-900">Pourquoi cette conclusion ?</h3>
+        <p class="text-xs text-slate-500">Justifications techniques et constatations identifiées lors de l&apos;examen :</p>
+        <div id="res-evidence-list" class="space-y-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 4 : HISTORIQUE -->
+    <section id="screen-history" class="hidden space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">Historique des analyses</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Retrouvez les vérifications médias déjà traitées.</p>
+        </div>
+        <button onclick="showScreen('screen-upload')" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold rounded-xl cursor-pointer">
+          + Nouvelle analyse
+        </button>
+      </div>
+
+      <div id="history-list-container" class="space-y-3">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white py-6 mt-auto text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      Plateforme africaine de vérification numérique — Forensic Media MVP V1
+    </div>
+  </footer>
+
+  <script>
+    let currentAnalysisId = null;
+    let selectedFile = null;
+
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const dropPrompt = document.getElementById('drop-prompt');
+    const previewContainer = document.getElementById('preview-container');
+    const imagePreview = document.getElementById('image-preview');
+
+    // Click anywhere on drop area to trigger file picker (unless clicking delete button)
+    dropArea.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON') {
+        fileInput.click();
+      }
+    });
+
+    // File Input change
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        processFile(e.target.files[0]);
+      }
+    });
+
+    // Drag & Drop events
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.classList.add('drag-active');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.classList.remove('drag-active');
+      }, false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      if (dt && dt.files && dt.files[0]) {
+        processFile(dt.files[0]);
+      }
+    });
+
+    function processFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).');
+        return;
+      }
+
+      selectedFile = file;
+      document.getElementById('file-name').innerText = file.name;
+      document.getElementById('file-size').innerText = (file.size / 1024).toFixed(1) + ' KB';
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.src = e.target.result;
+        dropPrompt.classList.add('hidden');
+        previewContainer.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearSelectedFile(e) {
+      if (e) e.stopPropagation();
+      selectedFile = null;
+      fileInput.value = '';
+      imagePreview.src = '';
+      previewContainer.classList.add('hidden');
+      dropPrompt.classList.remove('hidden');
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+      document.getElementById(screenId).classList.remove('hidden');
+      window.scrollTo(0, 0);
+    }
+
+    async function submitAnalysis() {
+      if (!selectedFile) {
+        alert('Veuillez d\\'abord sélectionner ou glisser une image.');
+        return;
+      }
+
+      const claim = document.getElementById('claim-input').value;
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      if (claim) formData.append('claim', claim);
+
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true;
+      btn.innerHTML = '<span>Traitement en cours...</span>';
+
+      try {
+        const res = await fetch('/api/v1/analyses', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || 'Erreur lors de l\\'envoi');
+
+        currentAnalysisId = data.analysis_id;
+        if (data.access_token) {
+          localStorage.setItem('token_' + data.analysis_id, data.access_token);
+        }
+
+        showScreen('screen-progress');
+        document.getElementById('progress-public-id').innerText = data.public_id;
+        pollProgress(data.analysis_id);
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Lancer l\\'analyse</span>';
+      }
+    }
+
+    async function pollProgress(analysisId) {
+      const token = localStorage.getItem('token_' + analysisId);
+      const headers = token ? { 'X-Analysis-Token': token } : {};
+
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/v1/analyses/${analysisId}/progress`, { headers });
+          if (!res.ok) return;
+          const data = await res.json();
+
+          document.getElementById('progress-bar-fill').style.width = data.progress_percent + '%';
+          
+          if (data.status === 'completed') {
+            clearInterval(interval);
+            loadResult(analysisId);
+          }
+        } catch (e) {}
+      }, 800);
+    }
+
+    async function loadResult(analysisId) {
+      currentAnalysisId = analysisId;
+      const token = localStorage.getItem('token_' + analysisId);
+      const headers = token ? { 'X-Analysis-Token': token } : {};
+
+      try {
+        const res = await fetch(`/api/v1/analyses/${analysisId}/result`, { headers });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || 'Erreur de chargement');
+
+        document.getElementById('res-public-id').innerText = data.public_id;
+        document.getElementById('res-filename').innerText = `${data.original_filename} • ${(data.file_size/1024).toFixed(1)} KB • SHA-256: ${data.sha256.substring(0, 16)}...`;
+
+        if (data.claim) {
+          document.getElementById('res-claim-box').classList.remove('hidden');
+          document.getElementById('res-claim-text').innerText = `« ${data.claim} »`;
+        } else {
+          document.getElementById('res-claim-box').classList.add('hidden');
+        }
+
+        // Conclusion Badge
+        const badge = document.getElementById('res-conclusion-badge');
+        if (data.conclusion_level === 'no_major_alert') {
+          badge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-emerald-50 text-emerald-800 border-emerald-200';
+          badge.innerHTML = '✅ Aucune alerte majeure identifiée';
+        } else if (data.conclusion_level === 'important_attention') {
+          badge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-rose-50 text-rose-800 border-rose-200';
+          badge.innerHTML = '⚠️ Attention importante requise';
+        } else {
+          badge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border bg-amber-50 text-amber-900 border-amber-200';
+          badge.innerHTML = '🔍 Vérification supplémentaire recommandée';
+        }
+
+        document.getElementById('res-summary').innerText = data.summary_fr || 'Synthèse des constatations.';
+
+        // 4 Indicators
+        document.getElementById('ind-provenance').innerText = data.provenance_status || 'Inconnue';
+        document.getElementById('ind-integrity').innerText = data.integrity_status || 'À examiner';
+        document.getElementById('ind-ai').innerText = data.ai_status || 'Indéterminé';
+        document.getElementById('ind-context').innerText = data.context_status || 'À vérifier';
+
+        // Evidence list
+        const evContainer = document.getElementById('res-evidence-list');
+        evContainer.innerHTML = '';
+        (data.evidences || []).forEach(ev => {
+          const div = document.createElement('div');
+          div.className = 'p-4 rounded-xl border border-slate-200 bg-white space-y-1';
+          div.innerHTML = `
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-xs text-slate-900">[${ev.evidence_type}] ${ev.title_fr}</span>
+              <span class="text-[10px] text-slate-400 font-mono">Moteur: ${ev.source_engine}</span>
+            </div>
+            <p class="text-xs text-slate-600">${ev.description_fr}</p>
+          `;
+          evContainer.appendChild(div);
+        });
+
+        showScreen('screen-result');
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function downloadReportPdfDirect() {
+      if (!currentAnalysisId) return;
+      const token = localStorage.getItem('token_' + currentAnalysisId);
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['X-Analysis-Token'] = token;
+
+      try {
+        const res = await fetch(`/api/v1/analyses/${currentAnalysisId}/reports`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ template_version: '1.0.0' })
+        });
+        const rep = await res.json();
+        const url = `/api/v1/reports/${rep.id}/download${token ? '?token=' + encodeURIComponent(token) : ''}`;
+        window.open(url, '_blank');
+      } catch (e) {
+        alert('Erreur lors du téléchargement du rapport.');
+      }
+    }
+
+    async function loadHistory() {
+      showScreen('screen-history');
+      const container = document.getElementById('history-list-container');
+      container.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">Chargement...</div>';
+
+      try {
+        const res = await fetch('/api/v1/analyses');
+        const data = await res.json();
+        container.innerHTML = '';
+
+        if (!data.items || data.items.length === 0) {
+          container.innerHTML = '<div class="text-center py-12 bg-white rounded-2xl border border-slate-200 p-8 text-slate-400 text-xs">Aucune analyse trouvée.</div>';
+          return;
+        }
+
+        data.items.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'p-4 bg-white border border-slate-200 rounded-xl flex items-center justify-between hover:border-slate-300 transition-all';
+          
+          let badgeColor = 'bg-slate-100 text-slate-700';
+          if (item.conclusion_level === 'important_attention') badgeColor = 'bg-rose-50 text-rose-800 border border-rose-200';
+          if (item.conclusion_level === 'no_major_alert') badgeColor = 'bg-emerald-50 text-emerald-800 border border-emerald-200';
+          if (item.conclusion_level === 'review_recommended') badgeColor = 'bg-amber-50 text-amber-900 border border-amber-200';
+
+          div.innerHTML = `
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded">${item.public_id}</span>
+                <span class="font-semibold text-xs text-slate-900">${item.original_filename}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${badgeColor}">${item.conclusion_level || 'pending'}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">${new Date(item.created_at).toLocaleString('fr-FR')}</p>
+            </div>
+            <button onclick="loadResult('${item.analysis_id}')" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-2xs">
+              Consulter
+            </button>
+          `;
+          container.appendChild(div);
+        });
+      } catch (e) {
+        container.innerHTML = '<div class="text-center py-8 text-rose-500 text-xs">Erreur lors de la récupération.</div>';
+      }
+    }
+
+    async function loadSampleCase(filename, claim) {
+      // Find matching item in history or notify
+      try {
+        const res = await fetch('/api/v1/analyses');
+        const data = await res.json();
+        const found = (data.items || []).find(item => item.original_filename === filename);
+        if (found) {
+          loadResult(found.analysis_id);
+        } else {
+          // Pre-fill claim
+          document.getElementById('claim-input').value = claim;
+          alert('Vous pouvez maintenant sélectionner l\\'image correspondante dans "temp_uploads/samples/" et cliquer sur Lancer l\\'analyse.');
+        }
+      } catch (e) {
+        alert('Erreur de chargement du cas.');
+      }
+    }
+  </script>
+</body>
+</html>

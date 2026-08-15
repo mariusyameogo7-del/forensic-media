@@ -1,85 +1,39 @@
-from fastapi import FastAPI, Request, status
+import os
+from pathlib import Path
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
-
+from fastapi.responses import HTMLResponse, FileResponse
 from apps.api.app.core.config import settings
-from apps.api.app.core.errors import AppError
 from apps.api.app.api.v1.router import api_router
 
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    description="API de la Plateforme africaine de vérification numérique (Forensic Media)",
+    title="Plateforme africaine de vérification numérique - API",
+    description="Backend d'analyse de provenance, d'intégrité et de contexte des médias numériques.",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
 
-# CORS Configuration
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-@app.exception_handler(AppError)
-async def app_error_handler(request: Request, exc: AppError):
-    """Handles domain errors with stable machine codes."""
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "error": {
-                "code": exc.code,
-                "message": exc.message,
-                "details": exc.details
-            }
-        }
-    )
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_error_handler(request: Request, exc: RequestValidationError):
-    """Handles Pydantic validation errors in standard format."""
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "error": {
-                "code": "VALIDATION_ERROR",
-                "message": "Les paramètres de la requête sont invalides.",
-                "details": {"errors": exc.errors()}
-            }
-        }
-    )
-
-
-@app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
-    """Catches all unexpected internal errors safely without leaking stack traces in production."""
-    message = str(exc) if settings.DEBUG else "Une erreur interne est survenue sur le serveur."
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "error": {
-                "code": "INTERNAL_SERVER_ERROR",
-                "message": message,
-            }
-        }
-    )
-
-
-# Attach API v1 Router
+# Include API v1 routes
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
+# Serve Web UI at root
+STATIC_FILE_PATH = Path(__file__).resolve().parent / "static" / "index.html"
 
-@app.get("/")
-def root():
-    return {
-        "name": settings.PROJECT_NAME,
-        "version": "1.0.0",
-        "docs": "/docs",
-        "health": f"{settings.API_V1_STR}/health",
-    }
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+async def serve_root_ui():
+    """Serves the interactive forensic verification web UI."""
+    if STATIC_FILE_PATH.exists():
+        return FileResponse(STATIC_FILE_PATH)
+    return HTMLResponse("<h1>Forensic Media API is running.</h1><p>Visit <a href='/docs'>/docs</a></p>")

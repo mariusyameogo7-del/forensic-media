@@ -121,3 +121,10 @@ class AnalysisListItem(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AnalysisListResponse(BaseModel):
+    items: List[AnalysisListItem]
+    total: int
+    limit: int
+    offset: int

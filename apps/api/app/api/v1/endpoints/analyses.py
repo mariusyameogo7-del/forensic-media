@@ -1,76 +1,72 @@
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
-from fastapi import (
-    APIRouter,
-    Depends,
-    UploadFile,
-    File,
-    Form,
-    Header,
-    Query,
-    status,
-)
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Header, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import select, desc
 
 from apps.api.app.core.database import get_db
+from apps.api.app.core.errors import InvalidFileError
 from apps.api.app.api.v1.endpoints.auth import get_current_user_optional, get_current_user
 from apps.api.app.models.user import User
-from apps.api.app.models.enums import (
-    ConclusionLevel,
-    ProvenanceStatus,
-    AIStatus,
-    ContextStatus,
-)
-from apps.api.app.services.upload_service import upload_service
-from apps.api.app.services.analysis_service import analysis_service
+from apps.api.app.models.analysis import Analysis
+from apps.api.app.models.access_token import AnalysisAccessToken
+from apps.api.app.models.enums import AnalysisStatus, ConclusionLevel
 from apps.api.app.schemas.analysis import (
     AnalysisCreateResponse,
     AnalysisProgressResponse,
-    AnalysisResultResponse,
+    EngineStepProgress,
+    AnalysisListResponse,
     AnalysisListItem,
 )
-from apps.api.app.schemas.common import PaginatedResponse
+from apps.api.app.services.upload_service import upload_service
+from apps.api.app.services.analysis_service import analysis_service
+from workers.analysis.worker.tasks import process_analysis_task
+from workers.analysis.worker.orchestrator import orchestrator
 
-router = APIRouter(tags=["Analyses"])
+router = APIRouter()
 
 
 @router.post(
     "/analyses",
     response_model=AnalysisCreateResponse,
-    status_code=status.HTTP_202_ACCEPTED,
-    summary="Créer et lancer une analyse d'image",
+    status_code=201,
+    summary="Soumettre un nouveau média pour analyse",
 )
 async def create_analysis(
-    file: UploadFile = File(..., description="Fichier image (JPG, JPEG, PNG, WEBP, max 20 MiB)"),
-    claim: Optional[str] = Form(None, description="Affirmation facultative associée à l'image"),
+    file: UploadFile = File(...),
+    claim: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    user: Optional[User] = Depends(get_current_user_optional),
+    current_user: Optional[User] = Depends(get_current_user_optional),
 ):
-    """
-    Receives an image file, validates MIME and binary signature, calculates SHA-256 and pHash,
-    stores the media in private storage, initiates the 7 engine runs, and enqueues asynchronous analysis.
-    """
     file_bytes = await file.read()
-    filename = file.filename or "upload.jpg"
+    if not file_bytes:
+        raise InvalidFileError("Le fichier envoyé est vide.")
 
-    # Validation and Hash computation
-    mime_type, sha256_hash, phash_val, norm_filename, preview_bytes = upload_service.validate_and_process(
+    # 1. Validation & Processing
+    mime_type, sha256_hash, phash_val, filename, preview_bytes = upload_service.validate_and_process(
         file_bytes=file_bytes,
-        filename=filename,
+        filename=file.filename or "media_file",
         content_type=file.content_type,
     )
 
+    # 2. Database Record & Initial Runs Creation
     analysis, plain_token = analysis_service.create_analysis(
         db=db,
         file_bytes=file_bytes,
-        filename=norm_filename,
+        filename=filename,
         mime_type=mime_type,
         sha256_hash=sha256_hash,
         phash_val=phash_val,
         preview_bytes=preview_bytes,
         claim=claim,
-        user=user,
+        user=current_user,
     )
+
+    # 3. Enqueue Celery Task / Fallback to direct synchronous execution
+    try:
+        process_analysis_task.delay(str(analysis.id))
+    except Exception:
+        orchestrator.process(db, analysis.id)
 
     return AnalysisCreateResponse(
         analysis_id=analysis.id,
@@ -88,85 +84,100 @@ async def create_analysis(
 @router.get(
     "/analyses/{analysis_id}/progress",
     response_model=AnalysisProgressResponse,
-    summary="Consulter l'avancement de l'analyse (Polling HTTP)",
+    summary="Consulter l'état d'avancement technique de l'analyse",
 )
 def get_analysis_progress(
     analysis_id: UUID,
     db: Session = Depends(get_db),
-    user: Optional[User] = Depends(get_current_user_optional),
+    current_user: Optional[User] = Depends(get_current_user_optional),
     x_analysis_token: Optional[str] = Header(None, alias="X-Analysis-Token"),
 ):
-    """
-    Pollable endpoint reporting real-time progress.
-    Strictly forbids leaking partial conclusions before synthesis is completed.
-    """
-    analysis = analysis_service.get_by_id_or_404(db, analysis_id)
-    analysis_service.verify_access(db, analysis, user=user, raw_token=x_analysis_token)
-    return analysis_service.get_progress(db, analysis_id)
+    analysis = analysis_service.get_analysis_or_404(db, analysis_id)
+    analysis_service.verify_access(db, analysis, user=current_user, raw_token=x_analysis_token)
 
+    total_runs = len(analysis.engine_runs)
+    completed_runs = sum(
+        1 for r in analysis.engine_runs if r.status.value in ("completed", "failed", "skipped")
+    )
+    progress_percent = int((completed_runs / total_runs) * 100) if total_runs > 0 else 0
 
-@router.get(
-    "/analyses/{analysis_id}",
-    response_model=AnalysisResultResponse,
-    summary="Détail d'une analyse",
-)
-def get_analysis_detail(
-    analysis_id: UUID,
-    db: Session = Depends(get_db),
-    user: Optional[User] = Depends(get_current_user_optional),
-    x_analysis_token: Optional[str] = Header(None, alias="X-Analysis-Token"),
-):
-    """Returns the analysis overview, status, and synthesis."""
-    analysis = analysis_service.get_by_id_or_404(db, analysis_id)
-    analysis_service.verify_access(db, analysis, user=user, raw_token=x_analysis_token)
-    return analysis_service.get_result(db, analysis_id)
+    engine_items = [
+        EngineStepProgress(
+            engine_code=r.engine_code,
+            status=r.status,
+            started_at=r.started_at,
+            completed_at=r.completed_at,
+            duration_ms=r.duration_ms,
+        )
+        for r in analysis.engine_runs
+    ]
+
+    return AnalysisProgressResponse(
+        analysis_id=analysis.id,
+        public_id=analysis.public_id,
+        status=analysis.status,
+        progress_percent=progress_percent,
+        current_step=None,
+        steps=engine_items,
+        created_at=analysis.created_at,
+        updated_at=analysis.updated_at,
+        completed_at=analysis.completed_at,
+    )
 
 
 @router.get(
     "/analyses",
-    response_model=PaginatedResponse[AnalysisListItem],
-    summary="Historique des analyses de l'utilisateur",
+    response_model=AnalysisListResponse,
+    summary="Lister l'historique des analyses",
 )
 def list_analyses(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    conclusion: Optional[ConclusionLevel] = Query(None),
+    status: Optional[AnalysisStatus] = Query(None),
+    search: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-    search: Optional[str] = Query(None, description="Recherche par nom, public_id ou affirmation"),
-    conclusion: Optional[ConclusionLevel] = Query(None, description="Filtre par conclusion"),
-    provenance: Optional[ProvenanceStatus] = Query(None, description="Filtre par provenance"),
-    ai: Optional[AIStatus] = Query(None, description="Filtre par indice IA"),
-    context: Optional[ContextStatus] = Query(None, description="Filtre par contexte"),
-    sort: str = Query("desc", enum=["asc", "desc"], description="Ordre de tri temporel"),
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
+    current_user: Optional[User] = Depends(get_current_user_optional),
 ):
-    """Lists analyses belonging to the authenticated user with multi-dimensional filters."""
-    return analysis_service.list_analyses(
-        db=db,
-        user=user,
-        search=search,
-        conclusion=conclusion,
-        provenance=provenance,
-        ai=ai,
-        context=context,
-        sort_order=sort,
-        page=page,
-        page_size=page_size,
-    )
+    query = select(Analysis)
 
+    if current_user:
+        query = query.where(Analysis.user_id == current_user.id)
+    
+    if conclusion:
+        query = query.where(Analysis.conclusion_level == conclusion)
+    if status:
+        query = query.where(Analysis.status == status)
+    if search:
+        query = query.where(
+            (Analysis.original_filename.ilike(f"%{search}%"))
+            | (Analysis.public_id.ilike(f"%{search}%"))
+            | (Analysis.claim.ilike(f"%{search}%"))
+        )
 
-@router.delete(
-    "/analyses/{analysis_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="Supprimer une analyse et ses fichiers associés",
-)
-def delete_analysis(
-    analysis_id: UUID,
-    db: Session = Depends(get_db),
-    user: Optional[User] = Depends(get_current_user_optional),
-    x_analysis_token: Optional[str] = Header(None, alias="X-Analysis-Token"),
-):
-    """Deletes the analysis and triggers private storage cleanup."""
-    analysis = analysis_service.get_by_id_or_404(db, analysis_id)
-    analysis_service.verify_access(db, analysis, user=user, raw_token=x_analysis_token)
-    analysis_service.delete_analysis(db, analysis)
-    return None
+    query = query.order_by(desc(Analysis.created_at))
+
+    total = len(db.execute(query).scalars().all())
+    items = db.execute(query.offset(offset).limit(limit)).scalars().all()
+
+    list_items = [
+        AnalysisListItem(
+            analysis_id=a.id,
+            public_id=a.public_id,
+            original_filename=a.original_filename,
+            file_size=a.file_size,
+            sha256=a.sha256,
+            claim_preview=(a.claim[:80] + "...") if a.claim and len(a.claim) > 80 else a.claim,
+            status=a.status,
+            has_original_file=True,
+            conclusion_level=a.conclusion_level,
+            provenance_status=a.provenance_status,
+            integrity_status=a.integrity_status,
+            ai_status=a.ai_status,
+            context_status=a.context_status,
+            created_at=a.created_at,
+        )
+        for a in items
+    ]
+
+    return AnalysisListResponse(items=list_items, total=total, limit=limit, offset=offset)

@@ -1,17 +1,17 @@
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, EmailStr, ConfigDict
+from pydantic import BaseModel, ConfigDict
 from apps.api.app.models.enums import AccountType
 
 
 class UserRegisterRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 
 class UserLoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 
@@ -33,7 +33,7 @@ class AuthTokenResponse(BaseModel):
 
 
 class ForgotPasswordRequest(BaseModel):
-    email: EmailStr
+    email: str
 
 
 class ResetPasswordRequest(BaseModel):
