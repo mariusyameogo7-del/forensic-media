@@ -7,17 +7,15 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# System dependencies (ExifTool, libmagic, libpq, build tools)
+# Install minimal OS dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
     curl \
-    libpq-dev \
     libmagic1 \
-    exiftool \
     && rm -rf /var/lib/apt/lists/*
 
 COPY apps/api/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r /app/requirements.txt
 
 COPY apps/api /app/apps/api
 COPY workers/analysis /app/workers/analysis
@@ -26,4 +24,4 @@ ENV PYTHONPATH="/app:/app/apps/api:/app/workers/analysis:${PYTHONPATH}"
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn apps.api.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "python -m uvicorn apps.api.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
