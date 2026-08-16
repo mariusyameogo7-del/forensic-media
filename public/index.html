@@ -159,8 +159,8 @@
       
       <div class="header-right">
         <div id="quota-display" class="quota-badge">
-          <span>⭐ Crédits d'essai :</span>
-          <strong id="quota-count">3 / 3</strong>
+          <span>⭐ Essai Libre :</span>
+          <strong id="quota-count">3 / 3 restants</strong>
         </div>
         <nav>
           <button id="nav-verify" class="nav-btn active" onclick="showScreen('screen-upload')">Vérifier</button>
@@ -226,7 +226,7 @@
     <section id="screen-progress" class="hidden">
       <div class="card progress-box">
         <div class="pill">⏳ Analyse criminalistique en cours...</div>
-        <h2 style="font-size:22px; font-weight:800; margin- apprehension: 10px 0;">Examen multi-dimensionnel</h2>
+        <h2 style="font-size:22px; font-weight:800; margin: 10px 0;">Examen multi-dimensionnel</h2>
         <div style="font-size:13px; color:#64748b;">Référence : <span id="progress-public-id" style="font-family:monospace; font-weight:700; color:#0f172a;">AN-...</span></div>
         
         <div class="progress-bar-bg">
@@ -420,7 +420,7 @@
           <h3 id="auth-user-email" style="font-weight:800; font-size:16px;">utilisateur@example.com</h3>
           <div id="auth-user-plan" style="font-size:13px; color:#0284c7; font-weight:800; margin:6px 0 16px 0;">Compte Actif</div>
           <button class="btn-submit" style="background:#0284c7; margin-top:0;" onclick="showScreen('screen-upload')">Lancer une analyse</button>
-          <button class="btn-admin" style="width:100%; margin-top:8px;" onclick="logoutUser()">Se déconnecter</button>
+          <button class="btn-admin" style="width:100%; margin-top:8px;" onclick="logoutUser()">Se déconnecter (Revenir à l'Essai Libre)</button>
         </div>
 
         <div id="auth-form-view">
@@ -620,7 +620,9 @@
     var adminKey = localStorage.getItem("forensic_admin_key") || "";
     var userToken = localStorage.getItem("forensic_user_token") || "";
     var userEmail = localStorage.getItem("forensic_user_email") || "";
-    var userPlan = localStorage.getItem("forensic_user_plan") || "trial";
+    
+    // Par défaut, si l'utilisateur n'est pas authentifié avec un compte payant, le plan est toujours 'trial' (Essai Libre)
+    var userPlan = (userToken && userEmail) ? (localStorage.getItem("forensic_user_plan") || "trial") : "trial";
 
     function checkAuthState() {
       if (userToken && userEmail) {
@@ -628,15 +630,40 @@
         document.getElementById("auth-form-view").classList.add("hidden");
         document.getElementById("auth-logged-in-view").classList.remove("hidden");
         document.getElementById("auth-user-email").textContent = userEmail;
-        document.getElementById("auth-user-plan").textContent = "Formule Active : " + userPlan.toUpperCase();
+        document.getElementById("auth-user-plan").textContent = "Formule Active : " + (userPlan === "trial" ? "Essai Libre" : userPlan.toUpperCase());
+
+        // Synchroniser le profil réel depuis le serveur
+        fetch("/api/v1/auth/me", { headers: { "Authorization": "Bearer " + userToken } })
+          .then(function(res) {
+            if (res.ok) return res.json();
+            throw new Error("Session expirée");
+          })
+          .then(function(u) {
+            if (u.account_type === "professional") userPlan = "pro";
+            else if (u.account_type === "institutional") userPlan = "plus";
+            else userPlan = "trial";
+            localStorage.setItem("forensic_user_plan", userPlan);
+            updateQuotaDisplay();
+          })
+          .catch(function() {
+            // En cas d'erreur de session, réinitialiser
+            userToken = "";
+            userEmail = "";
+            userPlan = "trial";
+            localStorage.removeItem("forensic_user_token");
+            localStorage.removeItem("forensic_user_email");
+            localStorage.removeItem("forensic_user_plan");
+            updateQuotaDisplay();
+          });
       } else {
+        userPlan = "trial";
+        localStorage.removeItem("forensic_user_plan");
         document.getElementById("nav-auth").textContent = "Connexion / Compte";
         document.getElementById("auth-form-view").classList.remove("hidden");
         document.getElementById("auth-logged-in-view").classList.add("hidden");
       }
+      updateQuotaDisplay();
     }
-
-    checkAuthState();
 
     // Quota management
     function getRemainingCredits() {
@@ -651,19 +678,18 @@
     }
 
     function updateQuotaDisplay() {
-      var countEl = document.getElementById("quota-count");
       var badgeEl = document.getElementById("quota-display");
 
-      if (userPlan === "plus") {
+      if (userToken && userEmail && userPlan === "plus") {
         badgeEl.className = "quota-badge plus";
         badgeEl.innerHTML = "<span>🚀 Formule PLUS :</span><strong>Illimité (Actif)</strong>";
-      } else if (userPlan === "pro") {
+      } else if (userToken && userEmail && userPlan === "pro") {
         badgeEl.className = "quota-badge pro";
         badgeEl.innerHTML = "<span>👑 Formule PRO :</span><strong>100 / mois (Actif)</strong>";
       } else {
         var credits = getRemainingCredits();
         badgeEl.className = (credits <= 1) ? "quota-badge low" : "quota-badge";
-        badgeEl.innerHTML = "<span>⭐ Crédits d'essai :</span><strong>" + credits + " / 3</strong>";
+        badgeEl.innerHTML = "<span>⭐ Essai Libre :</span><strong>" + credits + " / 3 restants</strong>";
       }
     }
 
@@ -672,7 +698,7 @@
       updateQuotaDisplay();
     }
 
-    updateQuotaDisplay();
+    checkAuthState();
 
     // Store user's own analysis tokens
     function addMyToken(token) {
@@ -1065,7 +1091,7 @@
       localStorage.removeItem("forensic_user_plan");
       checkAuthState();
       updateQuotaDisplay();
-      alert("Vous êtes déconnecté.");
+      alert("Vous êtes maintenant en mode visiteur (Essai Libre).");
       showScreen("screen-upload");
     }
 

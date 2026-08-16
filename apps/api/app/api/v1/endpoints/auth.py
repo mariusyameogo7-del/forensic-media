@@ -90,7 +90,8 @@ def login_user(payload: UserLoginRequest, db: Session = Depends(get_db)):
     )
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=UserResponse, summary="Profil de l'utilisateur connecté")
+@router.get("/auth/me", response_model=UserResponse, summary="Profil de l'utilisateur connecté")
 def get_current_user_profile(user: User = Depends(get_current_user)):
     """Retrieves profile of the currently logged in user."""
     return UserResponse.model_validate(user)
@@ -119,6 +120,8 @@ def update_preferences(
     if not prefs:
         prefs = UserPreferences(user_id=user.id)
         db.add(prefs)
+        db.commit()
+        db.refresh(prefs)
 
     if payload.retain_analysis_history is not None:
         prefs.retain_analysis_history = payload.retain_analysis_history
