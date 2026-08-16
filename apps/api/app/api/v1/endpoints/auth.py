@@ -1,11 +1,12 @@
 import uuid
 from typing import Optional
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from apps.api.app.core.database import get_db
 from apps.api.app.core.errors import UnauthorizedError, NotFoundError
+from apps.api.app.core.security import hash_password, verify_password
 from apps.api.app.models.user import User, UserPreferences
 from apps.api.app.models.enums import AccountType
 from apps.api.app.schemas.auth import (
@@ -29,8 +30,6 @@ def get_current_user_optional(
         return None
 
     token = authorization.replace("Bearer ", "").strip()
-    # Find or simulate authenticated user from token
-    # In full Supabase integration, verify JWT signature via Supabase client
     user = db.execute(select(User).where(User.supabase_user_id == token)).scalar_one_or_none()
     return user
 
@@ -44,17 +43,19 @@ def get_current_user(
     return user
 
 
-@router.post("/auth/register", response_model=AuthTokenResponse)
+@router.post("/auth/register", response_model=AuthTokenResponse, summary="Créer un nouveau compte utilisateur")
 def register_user(payload: UserRegisterRequest, db: Session = Depends(get_db)):
-    """Registers a new standard user account."""
-    existing = db.execute(select(User).where(User.email == payload.email)).scalar_one_or_none()
+    """Registers a new standard user account with email and password."""
+    email_clean = payload.email.strip().lower()
+    existing = db.execute(select(User).where(User.email == email_clean)).scalar_one_or_none()
     if existing:
-        raise UnauthorizedError("Un compte existe déjà avec cette adresse email.")
+        raise HTTPException(status_code=400, detail="Un compte existe déjà avec cette adresse email.")
 
-    dummy_supabase_id = f"sub_{uuid.uuid4().hex[:16]}"
+    token_secret = f"usr_{uuid.uuid4().hex}"
     user = User(
-        supabase_user_id=dummy_supabase_id,
-        email=payload.email,
+        supabase_user_id=token_secret,
+        email=email_clean,
+        password_hash=hash_password(payload.password),
         account_type=AccountType.STANDARD,
     )
     db.add(user)
@@ -75,12 +76,13 @@ def register_user(payload: UserRegisterRequest, db: Session = Depends(get_db)):
     )
 
 
-@router.post("/auth/login", response_model=AuthTokenResponse)
+@router.post("/auth/login", response_model=AuthTokenResponse, summary="Connexion d'un utilisateur existant")
 def login_user(payload: UserLoginRequest, db: Session = Depends(get_db)):
-    """Logs in an existing user."""
-    user = db.execute(select(User).where(User.email == payload.email)).scalar_one_or_none()
-    if not user:
-        raise UnauthorizedError("Identifiants incorrects.")
+    """Logs in an existing user with email and password."""
+    email_clean = payload.email.strip().lower()
+    user = db.execute(select(User).where(User.email == email_clean)).scalar_one_or_none()
+    if not user or not verify_password(payload.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect.")
 
     return AuthTokenResponse(
         access_token=user.supabase_user_id,

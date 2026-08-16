@@ -12,6 +12,7 @@ class User(Base):
     id = Column(Uuid, primary_key=True, default=uuid.uuid4)
     supabase_user_id = Column(String(255), unique=True, nullable=False, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=True)
     account_type = Column(
         SQLEnum(AccountType, native_enum=False),
         default=AccountType.STANDARD,

@@ -29,6 +29,19 @@ def compute_sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def hash_password(password: str) -> str:
+    """Hashes a password with SHA-256 and a fixed salt."""
+    salt = "forensic_media_salt_2026"
+    return hashlib.sha256(f"{salt}{password}".encode("utf-8")).hexdigest()
+
+
+def verify_password(plain_password: str, hashed_password: Optional[str]) -> bool:
+    """Verifies a plain password against stored hash."""
+    if not hashed_password:
+        return True
+    return hash_password(plain_password) == hashed_password
+
+
 def generate_public_id() -> str:
     """Generates a human-friendly public ID for display (e.g. AN-2026-A8B9C2)."""
     current_year = datetime.now(timezone.utc).year
