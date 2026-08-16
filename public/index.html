@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forensic Media — Plateforme africaine de vérification numérique</title>
+  <title>Forensic Media — Plateforme panafricaine de vérification numérique</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #f8fafc; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; }
@@ -19,12 +19,14 @@
     .quota-badge.low { background: #fff1f2; border-color: #fecdd3; color: #9f1239; }
     .quota-badge.pro { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
     .quota-badge.plus { background: #faf5ff; border-color: #e9d5ff; color: #7e22ce; }
+    .quota-badge.admin { background: #0f172a; border-color: #334155; color: #38bdf8; }
     
     nav { display: flex; align-items: center; gap: 6px; }
     .nav-btn { background: none; border: none; font-size: 13px; font-weight: 600; color: #475569; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
     .nav-btn:hover, .nav-btn.active { color: #0284c7; background: #f1f5f9; }
     .btn-admin { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 8px; cursor: pointer; }
     .btn-admin:hover { background: #e2e8f0; color: #0f172a; }
+    .btn-admin.logged-in { background: #0f172a; color: #38bdf8; border-color: #334155; }
     
     main { max-width: 1000px; margin: 0 auto; width: 100%; padding: 28px 20px; flex: 1; }
     .hero { text-align: center; margin-bottom: 24px; }
@@ -183,7 +185,7 @@
         <div class="logo-icon">🛡️</div>
         <div>
           <div class="logo-title">Forensic Media</div>
-          <div class="logo-sub">Plateforme de Vérification Numérique</div>
+          <div class="logo-sub">Plateforme Panafricaine & Mondiale de Vérification Numérique</div>
         </div>
       </div>
       
@@ -198,7 +200,7 @@
           <button id="nav-history" class="nav-btn" onclick="loadMyHistory()">Mon Historique</button>
           <button id="nav-pricing" class="nav-btn" onclick="showScreen('screen-pricing')">Tarifs & Offres</button>
           <button id="nav-auth" class="nav-btn" onclick="showScreen('screen-auth')">Connexion / Compte</button>
-          <button class="btn-admin" onclick="openAdminModal()">🛡️ Admin</button>
+          <button id="btn-admin-nav" class="btn-admin" onclick="openAdminModal()">🛡️ Mode Admin</button>
         </nav>
       </div>
     </div>
@@ -208,7 +210,7 @@
     <!-- SCREEN 1 : UPLOAD & VERIFICATION -->
     <section id="screen-upload">
       <div class="hero">
-        <div class="pill">✨ Détection IA Générative, Origine Matérielle EXIF & Antériorités Web / Réseaux Sociaux</div>
+        <div class="pill">🌍 Détection IA Générative, Origine Matérielle EXIF & Antériorités Web / Réseaux Sociaux</div>
         <h1>Vérifiez une image avant de la partager</h1>
         <p>Analysez l'appareil photo d'origine, les liens de publication antérieurs sur le Web et la signature IA.</p>
       </div>
@@ -235,8 +237,8 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Affirmation ou lieu à vérifier (Bénin : Cotonou, Porto-Novo, Parakou... / Monde : Abidjan, Dakar, Paris...)</label>
-          <textarea id="claim-input" rows="2" placeholder="Exemples : « Inondation hier à Cotonou », « Mobilisation à Porto-Novo », « Événement à Parakou », « Image créée par ChatGPT »..."></textarea>
+          <label class="form-label">Affirmation ou lieu à vérifier (Exemples : Ouagadougou, Abidjan, Dakar, Cotonou, Bamako, Paris, Lomé, Niamey...)</label>
+          <textarea id="claim-input" rows="2" placeholder="Exemples : « Inondation à Abidjan », « Mobilisation à Ouagadougou », « Événement à Dakar / Cotonou / Bamako », « Image créée par ChatGPT »..."></textarea>
         </div>
 
         <button type="button" id="btn-submit" class="btn-submit" onclick="submitAnalysis()">Lancer l'analyse approfondie</button>
@@ -244,11 +246,11 @@
       </div>
 
       <div class="sample-section">
-        <div class="sample-title">Exemples de cas types préparés :</div>
+        <div class="sample-title">Exemples de cas types interactifs :</div>
         <div class="sample-btns">
-          <button class="btn-sample" onclick="loadSampleCase('photo_manifestation_ouaga.jpg', 'Affirmation : Événement en direct à Cotonou')">🇧🇯 Cas 1 : Rumeur Cotonou / Bénin (Décontextualisation Web)</button>
-          <button class="btn-sample" onclick="loadSampleCase('photo_appareil_canon.jpg')">📷 Cas 2 : Cliché authentique avec EXIF d'appareil (Canon EOS)</button>
-          <button class="btn-sample" onclick="loadSampleCase('portrait_ia_synthetique.png')">🤖 Cas 3 : Image IA ChatGPT / DALL·E 3 (C2PA)</button>
+          <button class="btn-sample" onclick="loadSampleCase('photo_manifestation_ouaga.jpg', 'Affirmation : Événement en direct dans la sous-région')">🌍 Cas 1 : Rumeur virale sur les réseaux (Décontextualisation Web)</button>
+          <button class="btn-sample" onclick="loadSampleCase('photo_appareil_canon.jpg')">📷 Cas 2 : Cliché authentique avec EXIF d'appareil (Canon EOS 5D Mark IV)</button>
+          <button class="btn-sample" onclick="loadSampleCase('portrait_ia_synthetique.png')">🤖 Cas 3 : Image IA ChatGPT / DALL·E 3 (C2PA & Synthèse)</button>
         </div>
       </div>
     </section>
@@ -268,7 +270,7 @@
           <div>✓ Extraction des métadonnées EXIF matérielles (Appareil, Objectif, Focale, ISO, Date)</div>
           <div>✓ Inspection des manifestes C2PA / Content Credentials (OpenAI, Adobe, Midjourney)</div>
           <div>✓ Calcul des empreintes SHA-256, pHash et analyse spectrale FFT</div>
-          <div>✓ Recherche d'antériorités Web mondiales & réseaux de fact-checkers (Bénin Check, Africa Check)</div>
+          <div>✓ Recherche d'antériorités Web mondiales & réseaux de fact-checkers (Bénin Check, Africa Check, AFP)</div>
           <div>⏳ Synthèse de la conclusion prudente...</div>
         </div>
       </div>
@@ -450,7 +452,7 @@
     <!-- SCREEN 4 : SIMULATEUR BOT WHATSAPP & API DÉVELOPPEUR -->
     <section id="screen-whatsapp" class="hidden">
       <div class="hero">
-        <div class="pill">📲 Innovation : Fact-Checking Instantané sur WhatsApp</div>
+        <div class="pill">📲 Fact-Checking Instantané sur WhatsApp (Panafricain & Mondial)</div>
         <h1>Le Bot WhatsApp Forensic Media</h1>
         <p>Permettez aux journalistes et citoyens de transférer une photo douteuse sur WhatsApp et de recevoir la vérification en 3 secondes.</p>
       </div>
@@ -461,8 +463,8 @@
           <div class="wa-header">
             <div class="wa-avatar">🛡️</div>
             <div>
-              <div style="font-weight:800; font-size:14px;">Forensic Media Bot Bénin 🇧🇯</div>
-              <div style="font-size:11px; color:#00a884;" id="wa-status-text">● En ligne (+229 97 00 00 00)</div>
+              <div style="font-weight:800; font-size:14px;">Forensic Media Bot Panafricain 🌍</div>
+              <div style="font-size:11px; color:#00a884;" id="wa-status-text">● En ligne (+226 / +225 / +229 / +221 / +223 / +237...)</div>
             </div>
           </div>
 
@@ -487,6 +489,7 @@
           <div class="card">
             <h3 style="font-size:16px; font-weight:800; margin-bottom:10px; color:#0f172a;">⚡ Pourquoi cette intégration surpasse la concurrence ?</h3>
             <ul style="font-size:13px; line-height:2; color:#334155; padding-left:18px;">
+              <li><strong>Couverture Panafricaine :</strong> Fonctionne pour le Burkina Faso, Côte d'Ivoire, Bénin, Sénégal, Mali, Togo, Niger, Cameroun, RDC et le monde.</li>
               <li><strong>Canal n°1 en Afrique :</strong> Plus de 90% des fausses images virales se propagent via les groupes WhatsApp familiaux et communautaires.</li>
               <li><strong>Réponse automatisée en 3 secondes :</strong> Diagnostic instantané des métadonnées C2PA, pourcentage IA et antériorités Web sans quitter WhatsApp.</li>
               <li><strong>Accessible à tous :</strong> Aucune compétence technique requise pour le grand public.</li>
@@ -500,7 +503,7 @@
 curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
   -H "Authorization: Bearer VOTRE_CLE_API" \
   -F "file=@photo_suspecte.jpg" \
-  -F "claim=Affirmation vérifiée à Cotonou"
+  -F "claim=Affirmation vérifiée sur les réseaux"
             </pre>
           </div>
         </div>
@@ -693,7 +696,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
         <div id="view-pay-momo">
           <label class="form-label">Sélectionnez votre opérateur Mobile Money</label>
           <div class="operator-grid">
-            <div id="op-mtn" class="operator-btn selected" onclick="selectOperator('mtn_momo')">🟡 MTN MoMo (Bénin & Région)</div>
+            <div id="op-mtn" class="operator-btn selected" onclick="selectOperator('mtn_momo')">🟡 MTN MoMo</div>
             <div id="op-moov" class="operator-btn" onclick="selectOperator('moov_money')">🔵 Moov Money</div>
             <div id="op-orange" class="operator-btn" onclick="selectOperator('orange_money')">🟠 Orange Money</div>
             <div id="op-wave" class="operator-btn" onclick="selectOperator('wave')">🌊 Wave</div>
@@ -701,12 +704,12 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
 
           <div class="form-group" style="margin-top:10px;">
             <label class="form-label">Numéro de Téléphone Mobile Money</label>
-            <input type="tel" id="momo-phone" placeholder="Ex: +229 97 12 34 56 (Bénin) ou +226 70 12 34 56">
-            <div style="font-size:11px; color:#64748b; margin-top:4px;">💡 Saisissez le numéro avec son indicatif (+229 Bénin, +226 Burkina, +225 CI, +221 Sénégal, etc.)</div>
+            <input type="tel" id="momo-phone" placeholder="Ex: +226 70 12 34 56 (Burkina) ou +225 / +229 / +221...">
+            <div style="font-size:11px; color:#64748b; margin-top:4px;">💡 Saisissez le numéro avec son indicatif (+226 Burkina, +225 CI, +229 Bénin, +221 Sénégal, etc.)</div>
           </div>
 
           <div id="momo-instructions-box" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; font-size:12px; color:#0369a1; margin-top:12px;">
-            💡 <strong>Procédure MTN MoMo :</strong> Après validation, approuvez la demande de débit sur votre téléphone ou composez <strong>*133#</strong> / <strong>*138#</strong>.
+            💡 <strong>Procédure Mobile Money :</strong> Après validation, confirmez l'autorisation de débit sur votre téléphone ou via l'invite USSD.
           </div>
         </div>
 
@@ -784,7 +787,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
   </div>
 
   <footer>
-    Plateforme africaine de vérification numérique — Forensic Media Production
+    Plateforme panafricaine de vérification numérique — Forensic Media Production
   </footer>
 
   <script>
@@ -801,10 +804,18 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
     var adminKey = localStorage.getItem("forensic_admin_key") || "";
     var userToken = localStorage.getItem("forensic_user_token") || "";
     var userEmail = localStorage.getItem("forensic_user_email") || "";
-    
     var userPlan = (userToken && userEmail) ? (localStorage.getItem("forensic_user_plan") || "trial") : "trial";
 
     function checkAuthState() {
+      var btnAdminNav = document.getElementById("btn-admin-nav");
+      if (adminKey === "forensic_admin_2026") {
+        btnAdminNav.className = "btn-admin logged-in";
+        btnAdminNav.textContent = "🛡️ Mode Admin (Actif)";
+      } else {
+        btnAdminNav.className = "btn-admin";
+        btnAdminNav.textContent = "🛡️ Mode Admin";
+      }
+
       if (userToken && userEmail) {
         document.getElementById("nav-auth").textContent = "Mon Compte (" + userEmail.split("@")[0] + ")";
         document.getElementById("auth-form-view").classList.add("hidden");
@@ -844,6 +855,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
     }
 
     function getRemainingCredits() {
+      if (adminKey === "forensic_admin_2026") return 99999;
       if (userPlan === "plus") return 9999;
       if (userPlan === "pro") return 100;
       var c = localStorage.getItem("forensic_free_credits");
@@ -857,7 +869,10 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
     function updateQuotaDisplay() {
       var badgeEl = document.getElementById("quota-display");
 
-      if (userToken && userEmail && userPlan === "plus") {
+      if (adminKey === "forensic_admin_2026") {
+        badgeEl.className = "quota-badge admin";
+        badgeEl.innerHTML = "<span>🛡️ Admin :</span><strong>Analyses Illimitées</strong>";
+      } else if (userToken && userEmail && userPlan === "plus") {
         badgeEl.className = "quota-badge plus";
         badgeEl.innerHTML = "<span>🚀 Formule PLUS :</span><strong>Illimité (Actif)</strong>";
       } else if (userToken && userEmail && userPlan === "pro") {
@@ -868,11 +883,6 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
         badgeEl.className = (credits <= 1) ? "quota-badge low" : "quota-badge";
         badgeEl.innerHTML = "<span>⭐ Essai Libre :</span><strong>" + credits + " / 3 restants</strong>";
       }
-    }
-
-    function resetTrialCredits() {
-      localStorage.setItem("forensic_free_credits", "3");
-      updateQuotaDisplay();
     }
 
     checkAuthState();
@@ -1042,12 +1052,6 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
 
       var mapKey = { "orange_money": "orange", "moov_money": "moov", "mtn_momo": "mtn", "wave": "wave" };
       if (mapKey[op]) document.getElementById("op-" + mapKey[op]).classList.add("selected");
-
-      var box = document.getElementById("momo-instructions-box");
-      if (op === "mtn_momo") box.innerHTML = "💡 <strong>Procédure MTN MoMo (Bénin & Région) :</strong> Après validation, composez <strong>*133#</strong> ou <strong>*138#</strong> sur votre téléphone pour autoriser le débit.";
-      else if (op === "moov_money") box.innerHTML = "💡 <strong>Procédure Moov Money :</strong> Après validation, composez le <strong>*155*4#</strong> pour obtenir votre code de sécurité temporaire.";
-      else if (op === "orange_money") box.innerHTML = "💡 <strong>Procédure Orange Money :</strong> Après validation, composez le <strong>#144*4*6#</strong> sur votre téléphone pour générer votre code OTP.";
-      else if (op === "wave") box.innerHTML = "💡 <strong>Procédure Wave :</strong> Ouvrez votre application <strong>Wave</strong> pour valider le débit instantané.";
     }
 
     function detectAndFormatCard(input) {
@@ -1120,7 +1124,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
       } else {
         var phone = document.getElementById("momo-phone").value;
         if (!phone || phone.trim().length < 8) {
-          alert("Veuillez saisir votre numéro de téléphone Mobile Money (ex: +229 97 12 34 56 ou +226 70 12 34 56).");
+          alert("Veuillez saisir votre numéro de téléphone Mobile Money (ex: +226 70 12 34 56 ou +225 / +229 / +221...).");
           btn.disabled = false;
           btn.textContent = "Valider et Débiter le Montant";
           return;
@@ -1130,6 +1134,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
 
       var headers = { "Content-Type": "application/json" };
       if (userToken) headers["Authorization"] = "Bearer " + userToken;
+      if (adminKey) headers["X-Admin-Key"] = adminKey;
 
       fetch("/api/v1/payments/initiate", {
         method: "POST",
@@ -1177,6 +1182,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
 
       var headers = { "Content-Type": "application/json" };
       if (userToken) headers["Authorization"] = "Bearer " + userToken;
+      if (adminKey) headers["X-Admin-Key"] = adminKey;
 
       fetch("/api/v1/payments/confirm/" + currentPendingTxRef, {
         method: "POST",
@@ -1280,7 +1286,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
       }
 
       var credits = getRemainingCredits();
-      if (credits <= 0 && userPlan === "trial") {
+      if (credits <= 0 && userPlan === "trial" && adminKey !== "forensic_admin_2026") {
         showScreen("screen-pricing");
         return;
       }
@@ -1296,6 +1302,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
 
       var headers = {};
       if (userToken) headers["Authorization"] = "Bearer " + userToken;
+      if (adminKey) headers["X-Admin-Key"] = adminKey;
 
       fetch("/api/v1/analyses", { method: "POST", headers: headers, body: formData })
         .then(function(res) {
@@ -1309,7 +1316,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
             addMyToken(data.access_token);
           }
 
-          if (userPlan === "trial") {
+          if (userPlan === "trial" && adminKey !== "forensic_admin_2026") {
             localStorage.setItem("forensic_free_credits", String(Math.max(0, credits - 1)));
             updateQuotaDisplay();
           }
@@ -1330,8 +1337,10 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
 
     function pollProgress(analysisId) {
       var token = localStorage.getItem("token_" + analysisId);
-      var headers = token ? { "X-Analysis-Token": token } : {};
+      var headers = {};
+      if (token) headers["X-Analysis-Token"] = token;
       if (userToken) headers["Authorization"] = "Bearer " + userToken;
+      if (adminKey) headers["X-Admin-Key"] = adminKey;
 
       var count = 0;
       var interval = setInterval(function() {
@@ -1357,11 +1366,16 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
     function loadResult(analysisId) {
       currentAnalysisId = analysisId;
       var token = localStorage.getItem("token_" + analysisId);
-      var headers = token ? { "X-Analysis-Token": token } : {};
+      var headers = {};
+      if (token) headers["X-Analysis-Token"] = token;
       if (userToken) headers["Authorization"] = "Bearer " + userToken;
+      if (adminKey) headers["X-Admin-Key"] = adminKey;
 
       fetch("/api/v1/analyses/" + analysisId + "/result", { headers: headers })
-        .then(function(res) { return res.json(); })
+        .then(function(res) {
+          if (!res.ok) throw new Error("Erreur de consultation (" + res.status + ")");
+          return res.json();
+        })
         .then(function(data) {
           document.getElementById("res-public-id").textContent = data.public_id;
           document.getElementById("res-filename").textContent = data.original_filename + " • " + (data.file_size/1024).toFixed(1) + " KB • SHA-256: " + data.sha256.substring(0, 16) + "...";
@@ -1449,7 +1463,6 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
           webContainer.innerHTML = "";
           factContainer.innerHTML = "";
 
-          // Fact Checks debunks
           if (data.fact_check_debunks && data.fact_check_debunks.length > 0) {
             data.fact_check_debunks.forEach(function(fc) {
               var fDiv = document.createElement("div");
@@ -1509,6 +1522,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
       var headers = { "Content-Type": "application/json" };
       if (token) headers["X-Analysis-Token"] = token;
       if (userToken) headers["Authorization"] = "Bearer " + userToken;
+      if (adminKey) headers["X-Admin-Key"] = adminKey;
 
       fetch("/api/v1/analyses/" + currentAnalysisId + "/reports", {
         method: "POST",
@@ -1531,12 +1545,10 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
       list.innerHTML = "<div style='text-align:center; padding:20px; color:#64748b;'>Chargement de vos analyses...</div>";
 
       var headers = {};
-      if (userToken) {
-        headers["Authorization"] = "Bearer " + userToken;
-      } else {
-        var myTokens = getMyTokens();
-        if (myTokens.length > 0) headers["X-My-Tokens"] = myTokens.join(",");
-      }
+      if (userToken) headers["Authorization"] = "Bearer " + userToken;
+      if (adminKey) headers["X-Admin-Key"] = adminKey;
+      var myTokens = getMyTokens();
+      if (myTokens.length > 0) headers["X-My-Tokens"] = myTokens.join(",");
 
       fetch("/api/v1/analyses", { headers: headers })
         .then(function(res) { return res.json(); })
@@ -1566,7 +1578,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
     // SIMULATION BOT WHATSAPP
     function triggerWhatsAppSimulation() {
       var input = document.getElementById("wa-user-input");
-      var text = input.value.trim() || "Est-ce que cette photo à Cotonou est vraie ?";
+      var text = input.value.trim() || "Est-ce que cette photo est authentique ?";
       input.value = "";
 
       var box = document.getElementById("wa-dynamic-messages");
@@ -1585,17 +1597,17 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
         bDiv.className = "wa-bubble bot";
         
         var isAi = text.toLowerCase().includes("ia") || text.toLowerCase().includes("chatgpt");
-        var isBenin = text.toLowerCase().includes("cotonou") || text.toLowerCase().includes("porto-novo") || text.toLowerCase().includes("parakou");
+        var isDecontext = text.toLowerCase().includes("ouaga") || text.toLowerCase().includes("abidjan") || text.toLowerCase().includes("dakar") || text.toLowerCase().includes("cotonou") || text.toLowerCase().includes("bamako") || text.toLowerCase().includes("lomé");
 
         var reportMsg = "🛡️ <strong>Rapport d'analyse Forensic Media</strong><br><br>";
         if (isAi) {
           reportMsg += "⚠️ <strong>ALERTE IA : 99% (DALL·E 3 / OpenAI)</strong><br>";
           reportMsg += "• Manifeste C2PA : Présent & Déclaré synthétique<br>";
           reportMsg += "• Spectre FFT : Micro-artefacts algorithmiques détectés<br><br>";
-        } else if (isBenin) {
-          reportMsg += "⚠️ <strong>DÉCONTEXTUALISATION IDENTIFIÉE (Bénin Check)</strong><br>";
+        } else if (isDecontext) {
+          reportMsg += "⚠️ <strong>DÉCONTEXTUALISATION IDENTIFIÉE (Fact-Checkers Afrique)</strong><br>";
           reportMsg += "• Affirmation : « " + text + " »<br>";
-          reportMsg += "• Véritable origine : Lomé (Togo) en 2022<br><br>";
+          reportMsg += "• Véritable origine : Événement antérieur recyclé de 2022<br><br>";
         } else {
           reportMsg += "🔍 <strong>ANALYSE MULTI-DIMENSIONS</strong><br>";
           reportMsg += "• Indice IA : 8% (Faible)<br>";
@@ -1608,17 +1620,22 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
         
         bDiv.innerHTML = reportMsg;
         box.appendChild(bDiv);
-        statusText.textContent = "● En ligne (+229 97 00 00 00)";
+        statusText.textContent = "● En ligne (+226 / +225 / +229 / +221...)";
         box.scrollTop = box.scrollHeight;
       }, 1500);
     }
 
     function openAdminModal() {
-      var pass = prompt("Entrez votre clé d'accès Administrateur :", adminKey || "");
+      if (adminKey === "forensic_admin_2026") {
+        loadAdminDashboard();
+        return;
+      }
+      var pass = prompt("Entrez la clé d'accès Administrateur :", adminKey || "");
       if (!pass) return;
       if (pass === "forensic_admin_2026") {
         adminKey = pass;
         localStorage.setItem("forensic_admin_key", pass);
+        checkAuthState();
         loadAdminDashboard();
       } else {
         alert("Clé d'administration invalide.");
@@ -1658,14 +1675,15 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
     }
 
     function loadSampleCase(filename, claimText) {
-      fetch("/api/v1/analyses?admin_key=forensic_admin_2026&limit=20")
+      var headers = { "X-Admin-Key": "forensic_admin_2026" };
+      fetch("/api/v1/analyses?admin_key=forensic_admin_2026&limit=30", { headers: headers })
         .then(function(res) { return res.json(); })
         .then(function(data) {
           var found = (data.items || []).find(function(item) { return item.original_filename === filename; });
           if (found) {
             loadResult(found.analysis_id);
           } else {
-            alert("Glissez une image directement pour tester.");
+            alert("Glissez une photo directement pour analyser.");
           }
         })
         .catch(function(e) {

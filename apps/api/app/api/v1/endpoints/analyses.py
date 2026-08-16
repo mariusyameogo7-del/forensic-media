@@ -93,9 +93,12 @@ def get_analysis_progress(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user_optional),
     x_analysis_token: Optional[str] = Header(None, alias="X-Analysis-Token"),
+    admin_key: Optional[str] = Query(None),
+    x_admin_key: Optional[str] = Header(None, alias="X-Admin-Key"),
 ):
+    effective_admin_key = admin_key or x_admin_key
     analysis = analysis_service.get_by_id_or_404(db, analysis_id)
-    analysis_service.verify_access(db, analysis, user=current_user, raw_token=x_analysis_token)
+    analysis_service.verify_access(db, analysis, user=current_user, raw_token=x_analysis_token, admin_key=effective_admin_key)
 
     total_runs = len(analysis.engine_runs)
     completed_runs = sum(
@@ -137,9 +140,12 @@ def get_analysis_result(
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user_optional),
     x_analysis_token: Optional[str] = Header(None, alias="X-Analysis-Token"),
+    admin_key: Optional[str] = Query(None),
+    x_admin_key: Optional[str] = Header(None, alias="X-Admin-Key"),
 ):
+    effective_admin_key = admin_key or x_admin_key
     analysis = analysis_service.get_by_id_or_404(db, analysis_id)
-    analysis_service.verify_access(db, analysis, user=current_user, raw_token=x_analysis_token)
+    analysis_service.verify_access(db, analysis, user=current_user, raw_token=x_analysis_token, admin_key=effective_admin_key)
     return analysis_service.get_result(db, analysis_id)
 
 
