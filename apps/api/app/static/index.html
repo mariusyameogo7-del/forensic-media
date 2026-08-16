@@ -114,6 +114,16 @@
     
     .card-fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     
+    /* DYNAMIC CARD BRAND INPUT STYLING */
+    .card-input-wrapper { position: relative; display: flex; align-items: center; }
+    .card-input-wrapper input { padding-right: 140px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 15px; font-weight: 700; letter-spacing: 1px; }
+    .card-brand-badge { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 800; padding: 5px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; transition: all 0.25s ease; user-select: none; }
+    .card-brand-badge.default { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+    .card-brand-badge.visa { background: #1a1f71; color: #ffffff; border: 1px solid #002244; box-shadow: 0 2px 5px rgba(26,31,113,0.35); font-family: 'Arial Black', sans-serif; letter-spacing: 1.5px; }
+    .card-brand-badge.mastercard { background: linear-gradient(135deg, #eb001b, #f79e1b); color: #ffffff; border: 1px solid #eb001b; box-shadow: 0 2px 5px rgba(235,0,27,0.35); letter-spacing: 0.5px; }
+    .card-brand-badge.amex { background: #007bc1; color: #ffffff; border: 1px solid #005f94; box-shadow: 0 2px 5px rgba(0,123,193,0.35); letter-spacing: 1px; }
+    .card-brand-badge.discover { background: #ff6000; color: #ffffff; border: 1px solid #d95300; }
+    
     /* AUTH TAB */
     .auth-box { max-width: 440px; margin: 20px auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
     .auth-tabs { display: flex; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px; }
@@ -504,7 +514,8 @@
 
           <div class="form-group" style="margin-top:10px;">
             <label class="form-label">Numéro de Téléphone Mobile Money</label>
-            <input type="tel" id="momo-phone" placeholder="Ex : +226 70 11 22 33 ou +225 07 00 00 00" value="+226 70 11 22 33">
+            <input type="tel" id="momo-phone" placeholder="Ex: +226 70 12 34 56 ou +225 07 00 00 00">
+            <div style="font-size:11px; color:#64748b; margin-top:4px;">💡 Saisissez le numéro avec son indicatif (+226 Burkina, +225 CI, +221 Sénégal, etc.)</div>
           </div>
 
           <div id="momo-instructions-box" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; font-size:12px; color:#0369a1; margin-top:12px;">
@@ -515,19 +526,22 @@
         <!-- BLOC B : CARTE BANCAIRE (VISA / MASTERCARD) -->
         <div id="view-pay-card" class="hidden">
           <div class="form-group" style="margin-top:10px;">
-            <label class="form-label">Nom sur la Carte Bancaire</label>
+            <label class="form-label">Nom du titulaire (sur la carte)</label>
             <input type="text" id="card-holder" placeholder="Ex : MARIUS YAMEOGO">
           </div>
 
           <div class="form-group" style="margin-top:10px;">
-            <label class="form-label">Numéro de Carte (16 chiffres)</label>
-            <input type="text" id="card-number" placeholder="4485 0000 1234 5678" maxlength="19" oninput="formatCardNumber(this)">
+            <label class="form-label">Numéro de Carte Bancaire</label>
+            <div class="card-input-wrapper">
+              <input type="text" id="card-number" placeholder="4485 0000 1234 5678" maxlength="19" oninput="detectAndFormatCard(this)">
+              <div id="card-brand-badge" class="card-brand-badge default">💳 Détection auto</div>
+            </div>
           </div>
 
           <div class="card-fields-grid">
             <div class="form-group" style="margin-top:0;">
               <label class="form-label">Expiration (MM/AA)</label>
-              <input type="text" id="card-expiry" placeholder="08/28" maxlength="5">
+              <input type="text" id="card-expiry" placeholder="08/28" maxlength="5" oninput="formatExpiry(this)">
             </div>
             <div class="form-group" style="margin-top:0;">
               <label class="form-label">Cryptogramme CVV</label>
@@ -537,7 +551,7 @@
 
           <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; font-size:11px; color:#64748b; margin-top:12px; display:flex; align-items:center; gap:8px;">
             <span>🔒</span>
-            <span>Paiement chiffré SSL 256 bits et protégé par authentification <strong>3D-Secure</strong>.</span>
+            <span>Paiement chiffré SSL 256 bits et protégé par protocole bancaire <strong>3D-Secure</strong>.</span>
           </div>
         </div>
 
@@ -799,18 +813,44 @@
       else if (op === "wave") box.innerHTML = "💡 <strong>Procédure :</strong> Ouvrez votre application <strong>Wave</strong> pour valider le débit instantané.";
     }
 
-    function formatCardNumber(input) {
-      var v = input.value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
-      var matches = v.match(/\d{4,16}/g);
-      var match = (matches && matches[0]) || "";
-      var parts = [];
-      for (var i = 0, len = match.length; i < len; i += 4) {
-        parts.push(match.substring(i, i + 4));
-      }
-      if (parts.length) {
-        input.value = parts.join(" ");
+    // Auto-detection and dynamic formatting for credit card
+    function detectAndFormatCard(input) {
+      var raw = input.value.replace(/\D/g, "");
+      var badge = document.getElementById("card-brand-badge");
+      
+      // Brand detection
+      if (raw.startsWith("4")) {
+        badge.className = "card-brand-badge visa";
+        badge.innerHTML = "💳 VISA";
+      } else if (/^(5[1-5]|222[1-9]|22[3-9]|2[3-6]|27[01]|2720)/.test(raw)) {
+        badge.className = "card-brand-badge mastercard";
+        badge.innerHTML = "🔴🟠 Mastercard";
+      } else if (/^3[47]/.test(raw)) {
+        badge.className = "card-brand-badge amex";
+        badge.innerHTML = "💳 AMEX";
+      } else if (/^(6011|65|64[4-9])/.test(raw)) {
+        badge.className = "card-brand-badge discover";
+        badge.innerHTML = "💳 Discover";
       } else {
-        input.value = v;
+        badge.className = "card-brand-badge default";
+        badge.innerHTML = "💳 Détection auto";
+      }
+
+      // Spacing format: 4485 0000 1234 5678
+      var formatted = "";
+      for (var i = 0; i < raw.length; i++) {
+        if (i > 0 && i % 4 === 0) formatted += " ";
+        formatted += raw[i];
+      }
+      input.value = formatted.substring(0, 19);
+    }
+
+    function formatExpiry(input) {
+      var raw = input.value.replace(/\D/g, "");
+      if (raw.length >= 2) {
+        input.value = raw.substring(0, 2) + "/" + raw.substring(2, 4);
+      } else {
+        input.value = raw;
       }
     }
 
@@ -847,12 +887,12 @@
       } else {
         var phone = document.getElementById("momo-phone").value;
         if (!phone || phone.trim().length < 8) {
-          alert("Veuillez saisir votre numéro de téléphone Mobile Money valide.");
+          alert("Veuillez saisir votre numéro de téléphone Mobile Money (ex: +226 70 12 34 56).");
           btn.disabled = false;
           btn.textContent = "Valider et Débiter le Montant";
           return;
         }
-        payload.phone_number = phone;
+        payload.phone_number = phone.trim();
       }
 
       var headers = { "Content-Type": "application/json" };

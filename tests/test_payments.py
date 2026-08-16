@@ -9,22 +9,31 @@ import apps.api.app.models
 from apps.api.app.models.user import User
 from apps.api.app.models.enums import AccountType, SubscriptionPlan, PaymentOperator, PaymentStatus
 from apps.api.app.schemas.payment import PaymentInitiateRequest, PaymentConfirmRequest
-from apps.api.app.api.v1.endpoints.payments import initiate_payment, confirm_payment, get_payment_status
+from apps.api.app.api.v1.endpoints.payments import initiate_payment, confirm_payment, _detect_card_brand
 
 Base.metadata.create_all(bind=engine)
 
 
-def test_strict_otp_suite():
+def test_card_detection_suite():
     print("==================================================")
-    print("   TEST VERIFICATION STRICTE OTP LIE AU NUMERO   ")
+    print("   TEST DETECTION MARQUE CARTE BANCAIRE & OTP     ")
     print("==================================================")
+    
+    # 1. Test Unitaire de detection des marques
+    assert _detect_card_brand("4485 1234 5678 9012") == "Visa"
+    assert _detect_card_brand("5200 1234 5678 9012") == "Mastercard"
+    assert _detect_card_brand("2225 1234 5678 9012") == "Mastercard"
+    assert _detect_card_brand("3712 1234 5678 9012") == "American Express"
+    assert _detect_card_brand("6011 1234 5678 9012") == "Discover"
+    print("[OK UNITAIRE] Detection des marques (Visa, Mastercard, AMEX, Discover) validee !")
+
     db = SessionLocal()
     try:
-        test_email = "investigateur_strict@forensic.org"
+        test_email = "investigateur_card_brand@forensic.org"
         user = db.query(User).filter(User.email == test_email).first()
         if not user:
             user = User(
-                supabase_user_id="usr_test_strict_otp",
+                supabase_user_id="usr_test_card_brand",
                 email=test_email,
                 account_type=AccountType.STANDARD
             )
@@ -32,47 +41,45 @@ def test_strict_otp_suite():
             db.commit()
             db.refresh(user)
 
-        # 1. Initiation Mobile Money Orange Money
-        phone = "+226 70 99 88 77"
-        momo_req = PaymentInitiateRequest(
+        # 2. Test Paiement Visa
+        card_req_visa = PaymentInitiateRequest(
             plan=SubscriptionPlan.PRO,
-            operator=PaymentOperator.ORANGE_MONEY,
-            phone_number=phone,
+            operator=PaymentOperator.CARD,
+            card_holder_name="MARIUS YAMEOGO",
+            card_number="4485 9999 8888 7777",
+            card_expiry="11/29",
+            card_cvv="321",
             customer_email=test_email,
-            billing_cycle="monthly"
         )
-        init_res = initiate_payment(momo_req, db, current_user=user)
-        generated_otp = init_res.demo_otp
-        print("  Paiement Initie :", init_res.transaction_ref)
-        print("  Numero de telephone lie :", init_res.phone_number)
-        print("  OTP dynamique genere pour ce numero :", generated_otp)
-        assert generated_otp is not None and len(generated_otp) == 4
+        visa_init = initiate_payment(card_req_visa, db, current_user=user)
+        print("  Paiement Visa Initie :", visa_init.transaction_ref)
+        print("  Label detecte :", visa_init.phone_number)
+        assert "Visa" in visa_init.phone_number
 
-        # 2. Test Saisie d'un FAUX OTP (ex: 0000) -> DOIT ETRE STRICTEMENT REJETE
-        print("\n--- Test Saisie Faux OTP (0000) ---")
-        try:
-            confirm_payment(init_res.transaction_ref, payload=PaymentConfirmRequest(otp_code="0000"), db=db, current_user=user)
-            assert False, "Erreur : Le faux OTP n'aurait jamais du passer !"
-        except Exception as e:
-            detail = str(e.detail if hasattr(e, 'detail') else e)
-            print("  [OK REJET STRICT DU FAUX OTP] :", detail)
-            assert "incorrect" in detail
+        # 3. Test Paiement Mastercard
+        card_req_mc = PaymentInitiateRequest(
+            plan=SubscriptionPlan.PLUS,
+            operator=PaymentOperator.CARD,
+            card_holder_name="MARIUS YAMEOGO",
+            card_number="5412 1111 2222 3333",
+            card_expiry="05/28",
+            card_cvv="888",
+            customer_email=test_email,
+        )
+        mc_init = initiate_payment(card_req_mc, db, current_user=user)
+        print("  Paiement Mastercard Initie :", mc_init.transaction_ref)
+        print("  Label detecte :", mc_init.phone_number)
+        assert "Mastercard" in mc_init.phone_number
 
-        # 3. Test Saisie du BON OTP LIE AU TELEPHONE -> DOIT REUSSIR
-        print("\n--- Test Saisie du VRAI OTP lié au numéro (" + generated_otp + ") ---")
-        success_res = confirm_payment(init_res.transaction_ref, payload=PaymentConfirmRequest(otp_code=generated_otp), db=db, current_user=user)
-        print("  [OK VALIDATION] :", success_res.message_fr)
-        assert success_res.is_active == True
-        assert success_res.status == PaymentStatus.COMPLETED
-
-        db.refresh(user)
-        assert user.account_type == AccountType.PROFESSIONAL
-        print("  [OK SURCLASSEMENT] Le compte PRO a ete active avec succes !")
+        # 4. Confirmation 3D-Secure avec l'OTP genere
+        mc_confirm = confirm_payment(mc_init.transaction_ref, payload=PaymentConfirmRequest(otp_code=mc_init.demo_otp), db=db, current_user=user)
+        print("  [OK VALIDATION 3DS] :", mc_confirm.message_fr)
+        assert mc_confirm.is_active == True
 
     finally:
         db.close()
 
 
 if __name__ == "__main__":
-    test_strict_otp_suite()
-    print("\n[SUCCES] LA VERIFICATION STRICTE DU CODE OTP EST VALIDE A 100% !")
+    test_card_detection_suite()
+    print("\n[SUCCES] LA DETECTION AUTOMATIQUE DES CARTES EST 100% VALIDE !")

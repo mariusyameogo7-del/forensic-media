@@ -63,6 +63,22 @@ OPERATOR_INSTRUCTIONS = {
 }
 
 
+def _detect_card_brand(card_number: Optional[str]) -> str:
+    """Detects card brand based on BIN / Prefix."""
+    if not card_number:
+        return "Carte Bancaire"
+    clean = re.sub(r"\s+", "", card_number)
+    if clean.startswith("4"):
+        return "Visa"
+    elif clean.startswith(("51", "52", "53", "54", "55")) or (len(clean) >= 4 and clean[:4].isdigit() and 2221 <= int(clean[:4]) <= 2720):
+        return "Mastercard"
+    elif clean.startswith(("34", "37")):
+        return "American Express"
+    elif clean.startswith(("6011", "65")) or clean.startswith(("644", "645", "646", "647", "648", "649")):
+        return "Discover"
+    return "Carte Bancaire"
+
+
 def _validate_card_details(card_number: Optional[str], expiry: Optional[str], cvv: Optional[str], holder: Optional[str]):
     if not card_number or not expiry or not cvv:
         raise HTTPException(
@@ -100,6 +116,7 @@ def initiate_payment(
 ):
     """
     Initiates transaction and generates a unique OTP code tied directly to the phone number.
+    Detects card brand (Visa, Mastercard, etc.) when paying by card.
     """
     if payload.plan not in PLAN_PRICES_XOF:
         raise HTTPException(status_code=400, detail="Plan de souscription invalide (choisir 'pro' ou 'plus').")
@@ -107,6 +124,7 @@ def initiate_payment(
     billing = payload.billing_cycle or "monthly"
     amount = PLAN_PRICES_XOF[payload.plan].get(billing, PLAN_PRICES_XOF[payload.plan]["monthly"])
     
+    card_brand = None
     # Specific validation per operator
     if payload.operator == PaymentOperator.CARD:
         _validate_card_details(
@@ -115,7 +133,9 @@ def initiate_payment(
             payload.card_cvv,
             payload.card_holder_name
         )
-        phone_label = f"Carte Visa/Mastercard (**** {re.sub(r'\\s+', '', payload.card_number)[-4:]})"
+        card_brand = _detect_card_brand(payload.card_number)
+        last4 = re.sub(r"\s+", "", payload.card_number)[-4:]
+        phone_label = f"Carte {card_brand} (**** {last4})"
     else:
         if not payload.phone_number or len(payload.phone_number.strip()) < 8:
             raise HTTPException(
@@ -150,6 +170,7 @@ def initiate_payment(
             "billing_cycle": billing,
             "operator_name": op_info["name"],
             "card_holder": payload.card_holder_name if payload.operator == PaymentOperator.CARD else None,
+            "card_brand": card_brand,
             "expected_otp": dynamic_otp,
             "phone_number": phone_label,
             "otp_created_at": now_utc.isoformat(),
@@ -244,7 +265,7 @@ def confirm_payment(
         remaining = 3 - failed_attempts
         raise HTTPException(
             status_code=400,
-            detail=f"Code OTP « {code} » incorrect pour le numéro {phone_linked} ! Veuillez vérifier le SMS/USSD reçu ({remaining} tentative(s) restante(s))."
+            detail=f"Code OTP « {code} » incorrect pour {phone_linked} ! Veuillez vérifier le SMS/USSD reçu ({remaining} tentative(s) restante(s))."
         )
 
     # OTP is VALID ! Proceed to activation
