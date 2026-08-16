@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 from apps.api.app.models.enums import (
@@ -76,6 +76,56 @@ class IndicatorsSummary(BaseModel):
     context: ContextStatus
 
 
+class CameraMetadataDetails(BaseModel):
+    make: Optional[str] = None
+    model: Optional[str] = None
+    software: Optional[str] = None
+    lens_model: Optional[str] = None
+    iso: Optional[int] = None
+    exposure_time: Optional[str] = None
+    f_number: Optional[float] = None
+    focal_length: Optional[float] = None
+    date_time_original: Optional[datetime] = None
+    has_gps: bool = False
+    raw_details: Optional[Dict[str, Any]] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class WebMatchItem(BaseModel):
+    url: str
+    domain: str
+    title: Optional[str] = None
+    match_score: Optional[float] = None
+    earliest_date_found: Optional[datetime] = None
+    source_platform: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class FactCheckMatchItem(BaseModel):
+    publisher_name: str
+    publisher_site: str
+    claim_reviewed: str
+    rating: str
+    review_url: str
+    review_date: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class C2PADetails(BaseModel):
+    has_manifest: bool = False
+    is_valid: bool = False
+    issuer: Optional[str] = None
+    claim_generator: Optional[str] = None
+    digital_source_type: Optional[str] = None
+    ai_declared: bool = False
+    cert_info: Optional[Dict[str, Any]] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class AnalysisResultResponse(BaseModel):
     analysis_id: UUID
     public_id: str
@@ -102,6 +152,12 @@ class AnalysisResultResponse(BaseModel):
     provenance_issuer: Optional[str] = None # ex: "OpenAI, LLC"
     c2pa_valid: Optional[bool] = None
     c2pa_digital_source: Optional[str] = None
+    
+    # Deep Technical Breakdown
+    camera_metadata: Optional[CameraMetadataDetails] = None
+    web_occurrences: List[WebMatchItem] = []
+    fact_check_debunks: List[FactCheckMatchItem] = []
+    c2pa_details: Optional[C2PADetails] = None
     
     summary_fr: Optional[str] = None
     evidences: List[EvidenceItem] = []

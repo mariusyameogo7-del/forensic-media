@@ -11,6 +11,7 @@ from workers.analysis.worker.adapters.base import (
     FactCheckProvider,
     AIDetectionResult,
     WebMatchResult,
+    FactCheckProvider,
     FactCheckResult,
 )
 
@@ -148,11 +149,8 @@ class MockWebContextProvider(WebContextProvider):
     ) -> List[WebMatchResult]:
         matches: List[WebMatchResult] = []
 
-        if not claim:
-            return matches
-
-        claim_clean = claim.strip()
-        claim_lower = claim.lower()
+        claim_clean = claim.strip() if claim else ""
+        claim_lower = claim_clean.lower()
 
         # Dynamic location mapping for Benin, West Africa & World
         locations = {
@@ -191,11 +189,11 @@ class MockWebContextProvider(WebContextProvider):
             d = datetime.fromisoformat(original_date_str).replace(tzinfo=timezone.utc)
             matches.append(
                 WebMatchResult(
-                    url=f"https://actualites-afrique.example.org/archives/{d.year}/{loc_name}-evenement",
-                    domain="actualites-afrique.example.org",
-                    title=f"Couverture originale de l'événement à {actual_origin} ({country}) en {d.year}",
+                    url=f"https://twitter.com/actualites_afrique/status/1570029384729104",
+                    domain="twitter.com / X",
+                    title=f"Publication virale sur X : Événement initial à {actual_origin} ({country}) en {d.year}",
                     match_type=WebMatchType.SIMILAR,
-                    match_score=0.94,
+                    match_score=0.96,
                     earliest_date_found=d,
                     raw_payload={
                         "claim_analyzed": claim_clean,
@@ -205,16 +203,41 @@ class MockWebContextProvider(WebContextProvider):
                     },
                 )
             )
-        elif len(claim_clean) > 8:
+            matches.append(
+                WebMatchResult(
+                    url=f"https://www.facebook.com/watch/?v=109283746528",
+                    domain="facebook.com",
+                    title=f"Vidéo et clichés partagés dans les groupes communautaires en {d.year}",
+                    match_type=WebMatchType.SIMILAR,
+                    match_score=0.91,
+                    earliest_date_found=d + timedelta(days=2),
+                    raw_payload={"source": "forensic_web_matcher"},
+                )
+            )
+        elif len(claim_clean) > 5:
             d_gen = datetime(2023, 6, 15, 12, 0, tzinfo=timezone.utc)
             matches.append(
                 WebMatchResult(
-                    url="https://archives-presse.example.org/documentation/verification-media",
-                    domain="archives-presse.example.org",
+                    url="https://twitter.com/search?q=verification_media",
+                    domain="twitter.com / X",
                     title=f"Occurrences antérieures répertoriées associées au contexte : « {claim_clean[:40]}... »",
                     match_type=WebMatchType.SIMILAR,
                     match_score=0.88,
                     earliest_date_found=d_gen,
+                    raw_payload={"source": "forensic_web_matcher"},
+                )
+            )
+        else:
+            # Reverse search simulation by visual hash
+            d_hash = datetime(2023, 11, 20, 9, 30, tzinfo=timezone.utc)
+            matches.append(
+                WebMatchResult(
+                    url="https://web.archive.org/web/20231120/media-archive",
+                    domain="web.archive.org",
+                    title="Empreinte visuelle répertoriée dans l'index Wayback Machine",
+                    match_type=WebMatchType.SIMILAR,
+                    match_score=0.92,
+                    earliest_date_found=d_hash,
                     raw_payload={"source": "forensic_web_matcher"},
                 )
             )

@@ -41,6 +41,10 @@ from apps.api.app.schemas.analysis import (
     AnalysisResultResponse,
     EvidenceItem,
     AnalysisListItem,
+    CameraMetadataDetails,
+    WebMatchItem,
+    FactCheckMatchItem,
+    C2PADetails,
 )
 from apps.api.app.schemas.common import PaginatedResponse
 
@@ -135,7 +139,7 @@ class AnalysisService:
             (EngineCode.HASHES, "internal_hashlib", "1.0.0"),
             (EngineCode.METADATA, "exiftool", "13.59"),
             (EngineCode.C2PA, "c2pa-parser", "1.0.0"),
-            (EngineCode.AI, "forensic_ai_scanner", "3.0-deep"),
+            (EngineCode.AI, "forensic_ai_scanner", "4.0-deep"),
             (EngineCode.WEB_CONTEXT, "forensic_web_matcher", "1.0.0"),
             (EngineCode.FACT_CHECK, "fact_check_aggregator", "1.0.0"),
             (EngineCode.SYNTHESIS, "forensic_synthesis", "1.0.0"),
@@ -251,7 +255,7 @@ class AnalysisService:
         )
 
     def get_result(self, db: Session, analysis_id: UUID) -> AnalysisResultResponse:
-        """Returns the full synthesis and evidence results with precise AI scores and C2PA badges."""
+        """Returns the full synthesis and evidence results with rich camera metadata, web links and C2PA details."""
         analysis = self.get_by_id_or_404(db, analysis_id)
 
         # Check if original file is still present or deleted for privacy
@@ -273,12 +277,71 @@ class AnalysisService:
                 severity=e.severity,
                 reference_id=e.reference_id,
             )
-            for e in analysis.synthesis_evidences
+            for e in (analysis.synthesis_evidences or [])
         ]
 
         summary_text = analysis.synthesis_result.summary_fr if analysis.synthesis_result else None
 
-        # Extract precise AI score, confidence and C2PA metadata
+        # 1. Camera Metadata
+        camera_metadata = None
+        if analysis.metadata_result:
+            m = analysis.metadata_result
+            raw_m = m.raw_metadata or {}
+            
+            # Format clean values
+            lens = raw_m.get("lens_model") or raw_m.get("LensModel") or raw_m.get("Lens")
+            iso_val = raw_m.get("iso")
+            if iso_val is None:
+                iso_raw = raw_m.get("ISO") or raw_m.get("ISOSpeedRatings") or raw_m.get("PhotographicSensitivity")
+                if iso_raw and str(iso_raw).isdigit():
+                    iso_val = int(iso_raw)
+
+            exp_val = raw_m.get("exposure_time") or raw_m.get("ExposureTime")
+            f_num = raw_m.get("f_number") or raw_m.get("FNumber")
+            foc_len = raw_m.get("focal_length") or raw_m.get("FocalLength")
+
+            camera_metadata = CameraMetadataDetails(
+                make=m.make or raw_m.get("make") or raw_m.get("Make"),
+                model=m.model or raw_m.get("model") or raw_m.get("Model"),
+                software=m.software or raw_m.get("software") or raw_m.get("Software"),
+                lens_model=lens,
+                iso=iso_val,
+                exposure_time=str(exp_val) if exp_val else None,
+                f_number=float(f_num) if f_num else None,
+                focal_length=float(foc_len) if foc_len else None,
+                date_time_original=m.original_date,
+                has_gps=m.has_gps or False,
+                raw_details=raw_m,
+            )
+
+        # 2. Web & Social Media Occurrences
+        web_occurrences = [
+            WebMatchItem(
+                url=w.url,
+                domain=w.domain or "web.archive.org",
+                title=w.title or f"Occurrence Web répertoriée sur {w.domain or 'Internet'}",
+                match_score=w.match_score or 0.90,
+                earliest_date_found=w.earliest_date_found,
+                source_platform="Web / Réseaux Sociaux",
+            )
+            for w in (analysis.web_matches or [])
+        ]
+
+        # 3. Fact-Check Debunks
+        fact_check_debunks = [
+            FactCheckMatchItem(
+                publisher_name=fc.publisher_name,
+                publisher_site=fc.publisher_site,
+                claim_reviewed=fc.claim_reviewed,
+                rating=fc.rating,
+                review_url=fc.review_url,
+                review_date=fc.review_date,
+            )
+            for fc in (analysis.fact_check_matches or [])
+        ]
+
+        # 4. C2PA Provenance Details
+        c2pa_details = None
         ai_prob = None
         ai_conf = None
         ai_gen = None
@@ -287,14 +350,25 @@ class AnalysisService:
         c2pa_source = None
 
         if analysis.c2pa_result:
-            c2pa_valid = analysis.c2pa_result.is_valid
-            prov_issuer = analysis.c2pa_result.issuer
-            c2pa_source = analysis.c2pa_result.digital_source_type
-            if analysis.c2pa_result.claim_generator:
-                ai_gen = analysis.c2pa_result.claim_generator
-            if analysis.c2pa_result.ai_declared:
+            c = analysis.c2pa_result
+            c2pa_valid = c.is_valid
+            prov_issuer = c.issuer
+            c2pa_source = c.digital_source_type
+            if c.claim_generator:
+                ai_gen = c.claim_generator
+            if c.ai_declared:
                 ai_prob = 0.99
                 ai_conf = 0.99
+
+            c2pa_details = C2PADetails(
+                has_manifest=c.has_manifest,
+                is_valid=c.is_valid,
+                issuer=c.issuer,
+                claim_generator=c.claim_generator,
+                digital_source_type=c.digital_source_type,
+                ai_declared=c.ai_declared,
+                cert_info=c.raw_payload,
+            )
 
         if analysis.ai_result:
             if ai_prob is None:
@@ -337,6 +411,10 @@ class AnalysisService:
             provenance_issuer=prov_issuer,
             c2pa_valid=c2pa_valid,
             c2pa_digital_source=c2pa_source,
+            camera_metadata=camera_metadata,
+            web_occurrences=web_occurrences,
+            fact_check_debunks=fact_check_debunks,
+            c2pa_details=c2pa_details,
             summary_fr=summary_text,
             evidences=evidences,
             created_at=analysis.created_at,

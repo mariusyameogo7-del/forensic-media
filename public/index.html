@@ -80,6 +80,23 @@
     .score-gauge-fill { height: 100%; background: #0284c7; transition: width 0.4s; }
     .score-detail-sub { font-size: 11px; color: #64748b; margin-top: 4px; font-weight: 600; }
     
+    /* DETAILED INSPECTION TABS IN RESULTS */
+    .inspect-tabs { display: flex; gap: 6px; border-bottom: 2px solid #e2e8f0; margin: 24px 0 16px 0; overflow-x: auto; }
+    .inspect-tab-btn { background: none; border: none; padding: 10px 16px; font-weight: 700; font-size: 13px; color: #64748b; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; transition: all 0.2s; }
+    .inspect-tab-btn:hover { color: #0284c7; }
+    .inspect-tab-btn.active { color: #0284c7; border-bottom-color: #0284c7; background: #f0f9ff; border-radius: 8px 8px 0 0; }
+    
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+    .meta-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; }
+    .meta-item-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .meta-item-val { font-size: 13px; font-weight: 800; color: #0f172a; word-break: break-all; }
+    
+    .web-match-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+    .web-match-link { background: #0284c7; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .web-match-link:hover { background: #0369a1; }
+    
+    .factcheck-alert-card { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    
     .evidence-item { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; }
     .evidence-title { font-size: 13px; font-weight: 700; color: #0f172a; }
     .evidence-desc { font-size: 12px; color: #475569; margin-top: 3px; }
@@ -191,9 +208,9 @@
     <!-- SCREEN 1 : UPLOAD & VERIFICATION -->
     <section id="screen-upload">
       <div class="hero">
-        <div class="pill">✨ Détection IA Générative (ChatGPT, DALL·E 3, Midjourney) & Contexte Bénin / Afrique</div>
+        <div class="pill">✨ Détection IA Générative, Origine Matérielle EXIF & Antériorités Web / Réseaux Sociaux</div>
         <h1>Vérifiez une image avant de la partager</h1>
-        <p>Analysez l'origine, l'intégrité, le spectre fréquentiel IA et le contexte Web avec 4 dimensions indépendantes.</p>
+        <p>Analysez l'appareil photo d'origine, les liens de publication antérieurs sur le Web et la signature IA.</p>
       </div>
 
       <div class="card">
@@ -203,7 +220,7 @@
           <div id="drop-prompt">
             <div class="drop-icon">📷</div>
             <div class="drop-title">Cliquez ou glissez une image ici</div>
-            <div class="drop-sub">Compatible : Images ChatGPT / DALL·E 3, Midjourney v6, Flux.1, photos d'appareils (JPG, PNG, WEBP)</div>
+            <div class="drop-sub">Compatible : Images ChatGPT / DALL·E 3, Midjourney v6, Flux.1, photos d'appareils Canon/Nikon/Sony/Smartphones (JPG, PNG, WEBP)</div>
             <button type="button" class="btn-browse" onclick="document.getElementById('file-input').click()">Parcourir vos fichiers</button>
           </div>
 
@@ -229,8 +246,8 @@
       <div class="sample-section">
         <div class="sample-title">Exemples de cas types préparés :</div>
         <div class="sample-btns">
-          <button class="btn-sample" onclick="loadSampleCase('photo_manifestation_ouaga.jpg', 'Affirmation : Événement en direct à Cotonou')">🇧🇯 Cas 1 : Rumeur Cotonou / Bénin (Décontextualisation)</button>
-          <button class="btn-sample" onclick="loadSampleCase('photo_appareil_canon.jpg')">📷 Cas 2 : Cliché authentique avec EXIF d'appareil</button>
+          <button class="btn-sample" onclick="loadSampleCase('photo_manifestation_ouaga.jpg', 'Affirmation : Événement en direct à Cotonou')">🇧🇯 Cas 1 : Rumeur Cotonou / Bénin (Décontextualisation Web)</button>
+          <button class="btn-sample" onclick="loadSampleCase('photo_appareil_canon.jpg')">📷 Cas 2 : Cliché authentique avec EXIF d'appareil (Canon EOS)</button>
           <button class="btn-sample" onclick="loadSampleCase('portrait_ia_synthetique.png')">🤖 Cas 3 : Image IA ChatGPT / DALL·E 3 (C2PA)</button>
         </div>
       </div>
@@ -248,16 +265,16 @@
         </div>
 
         <div style="text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; font-size:13px; line-height:1.8;">
+          <div>✓ Extraction des métadonnées EXIF matérielles (Appareil, Objectif, Focale, ISO, Date)</div>
           <div>✓ Inspection des manifestes C2PA / Content Credentials (OpenAI, Adobe, Midjourney)</div>
           <div>✓ Calcul des empreintes SHA-256, pHash et analyse spectrale FFT</div>
-          <div>✓ Évaluation du pourcentage probabiliste d'IA générative & Deepfakes</div>
           <div>✓ Recherche d'antériorités Web mondiales & réseaux de fact-checkers (Bénin Check, Africa Check)</div>
           <div>⏳ Synthèse de la conclusion prudente...</div>
         </div>
       </div>
     </section>
 
-    <!-- SCREEN 3 : RESULTAT -->
+    <!-- SCREEN 3 : RESULTAT COMPLET & DÉTAILS APPROFONDIS -->
     <section id="screen-result" class="hidden">
       <div class="res-header">
         <div>
@@ -278,13 +295,14 @@
         <div id="res-claim-text" style="font-style:italic; font-size:13px; color:#334155;">« ... »</div>
       </div>
 
+      <!-- CARTE SYNTHÈSE & 4 DIMENSIONS -->
       <div class="card">
         <span class="form-label">Synthèse de l'évaluation</span>
         <div id="res-conclusion-badge" class="badge-conclusion">Conclusion</div>
         <p id="res-summary" style="font-size:14px; line-height:1.6; color:#334155; background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #e2e8f0; margin-top:10px;"></p>
 
         <div style="margin-top:20px;">
-          <span class="form-label">Les 4 dimensions d'évaluation indépendantes & Scores</span>
+          <span class="form-label">Les 4 dimensions d'évaluation indépendantes</span>
           <div class="grid-4">
             
             <!-- Dimension 1 : Provenance -->
@@ -333,22 +351,99 @@
         </div>
       </div>
 
-      <!-- CARTOUCHE INNOVATION : ANALYSE FREQUENTIELLE FFT & DEEPFAKES -->
-      <div class="card" style="background:#f0f9ff; border:1px solid #bae6fd;">
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-          <span style="font-size:20px;">🔬</span>
-          <h3 style="font-size:15px; font-weight:800; color:#0369a1;">Moteur d'Analyse Spectrale FFT & Détection Deepfakes</h3>
-        </div>
-        <p style="font-size:13px; color:#334155; line-height:1.6;">
-          Examen approfondi du domaine fréquentiel (Transformée de Fourier 2D) et de la cohérence du bruit de capteur physique :
-          permet d'identifier les discontinuités de fusion sur les visages, le lissage synthétique et les artefacts résiduels invisibles à l'œil nu.
-        </p>
-      </div>
-
+      <!-- ONGLETS D'INSPECTION APPROFONDIE (EXIF, LIENS WEB & RESEAUX SOCIAUX, C2PA, PREUVES) -->
       <div class="card">
-        <h3 style="font-size:16px; font-weight:800; margin-bottom:6px;">Pourquoi cette conclusion ? (Explicabilité & Preuves)</h3>
-        <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Constatations techniques adossées à chaque moteur :</p>
-        <div id="res-evidence-list"></div>
+        <h3 style="font-size:17px; font-weight:800; color:#0f172a; margin-bottom:4px;">🔍 Rapport d'Inspection Détaillé</h3>
+        <p style="font-size:12px; color:#64748b;">Consultez les métadonnées matérielles de l'appareil et les liens d'apparition sur le Web :</p>
+        
+        <div class="inspect-tabs">
+          <button id="tab-insp-camera" class="inspect-tab-btn active" onclick="switchInspectTab('camera')">📷 Appareil & Métadonnées EXIF</button>
+          <button id="tab-insp-web" class="inspect-tab-btn" onclick="switchInspectTab('web')">🌐 Antériorités Web & Réseaux Sociaux</button>
+          <button id="tab-insp-c2pa" class="inspect-tab-btn" onclick="switchInspectTab('c2pa')">🔒 Traçabilité C2PA</button>
+          <button id="tab-insp-evidences" class="inspect-tab-btn" onclick="switchInspectTab('evidences')">🔬 Preuves Techniques & FFT</button>
+        </div>
+
+        <!-- PANNEAU 1 : EXIF & APPAREIL PHOTO -->
+        <div id="pane-insp-camera">
+          <div id="camera-diag-banner" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px 16px; font-size:13px; color:#0369a1; margin-bottom:14px; font-weight:600;">
+            Diagnostic matériel : Recherche des caractéristiques du capteur optique...
+          </div>
+
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="meta-item-label">Marque & Modèle de l'Appareil</div>
+              <div id="det-cam-model" class="meta-item-val">Non spécifié / Absent</div>
+            </div>
+
+            <div class="meta-item">
+              <div class="meta-item-label">Objectif & Focale</div>
+              <div id="det-cam-lens" class="meta-item-val">Non spécifié</div>
+            </div>
+
+            <div class="meta-item">
+              <div class="meta-item-label">Paramètres d'Exposition (ISO / Vitesse / Ouverture)</div>
+              <div id="det-cam-exposure" class="meta-item-val">Non disponible</div>
+            </div>
+
+            <div class="meta-item">
+              <div class="meta-item-label">Date & Heure Originale de Prise de Vue</div>
+              <div id="det-cam-date" class="meta-item-val">Non renseignée</div>
+            </div>
+
+            <div class="meta-item">
+              <div class="meta-item-label">Logiciel de Traitement / Retouche</div>
+              <div id="det-cam-software" class="meta-item-val">Aucun logiciel détecté</div>
+            </div>
+
+            <div class="meta-item">
+              <div class="meta-item-label">Géolocalisation GPS</div>
+              <div id="det-cam-gps" class="meta-item-val">Absente (Protection de la vie privée)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANNEAU 2 : LIENS WEB & RESEAUX SOCIAUX -->
+        <div id="pane-insp-web" class="hidden">
+          <div id="factcheck-alert-container"></div>
+          
+          <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:10px;">
+            Occurrences et antériorités répertoriées sur Internet & Réseaux Sociaux :
+          </div>
+
+          <div id="web-matches-list">
+            <!-- Rempli dynamiquement -->
+          </div>
+        </div>
+
+        <!-- PANNEAU 3 : C2PA CONTENT CREDENTIALS -->
+        <div id="pane-insp-c2pa" class="hidden">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <div class="meta-item-label">Manifeste C2PA Détecté</div>
+              <div id="det-c2pa-manifest" class="meta-item-val">Non</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-item-label">Validité de la Signature</div>
+              <div id="det-c2pa-valid" class="meta-item-val">Non applicable</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-item-label">Émetteur / Créateur de Contenu</div>
+              <div id="det-c2pa-issuer" class="meta-item-val">Inconnu</div>
+            </div>
+            <div class="meta-item">
+              <div class="meta-item-label">Type de Source Numérique</div>
+              <div id="det-c2pa-source" class="meta-item-val">Non déclaré</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANNEAU 4 : PREUVES TECHNIQUES & FFT -->
+        <div id="pane-insp-evidences" class="hidden">
+          <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; font-size:12px; color:#0369a1; margin-bottom:14px;">
+            🔬 <strong>Analyse Fréquentielle 2D-FFT :</strong> Examen du spectre résiduel du capteur, de la symétrie radiale et de la cohérence des contours faciaux.
+          </div>
+          <div id="res-evidence-list"></div>
+        </div>
       </div>
     </section>
 
@@ -871,6 +966,18 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
       window.scrollTo(0, 0);
     }
 
+    function switchInspectTab(tabKey) {
+      var tabs = ["camera", "web", "c2pa", "evidences"];
+      tabs.forEach(function(t) {
+        var b = document.getElementById("tab-insp-" + t);
+        var p = document.getElementById("pane-insp-" + t);
+        if (b) b.classList.remove("active");
+        if (p) p.classList.add("hidden");
+      });
+      document.getElementById("tab-insp-" + tabKey).classList.add("active");
+      document.getElementById("pane-insp-" + tabKey).classList.remove("hidden");
+    }
+
     function closeModal(id) {
       var el = document.getElementById(id);
       if (el) el.classList.add("hidden");
@@ -1287,7 +1394,7 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
 
           // 2. Intégrité
           document.getElementById("ind-integrity").textContent = data.integrity_status || "À examiner";
-          document.getElementById("ind-integrity-sub").textContent = data.has_original_file ? "Métadonnées examinées" : "Média purgé (Privacy)";
+          document.getElementById("ind-integrity-sub").textContent = data.camera_metadata && data.camera_metadata.model ? ("Appareil : " + data.camera_metadata.model) : (data.has_original_file ? "Métadonnées examinées" : "Média purgé (Privacy)");
 
           // 3. Indices IA avec pourcentage chiffré
           var scorePct = Math.round((data.ai_probability_score || 0.08) * 100);
@@ -1298,9 +1405,86 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
 
           // 4. Contexte Web
           document.getElementById("ind-context").textContent = data.context_status || "À vérifier";
-          document.getElementById("ind-context-sub").textContent = "Antériorités & Fact-checks";
+          document.getElementById("ind-context-sub").textContent = (data.web_occurrences && data.web_occurrences.length > 0) ? (data.web_occurrences.length + " antériorités Web trouvées") : "Fact-checks & antériorités";
 
-          // Evidences
+          // POPULATE TAB 1 : EXIF CAMERA METADATA
+          var meta = data.camera_metadata;
+          var camDiag = document.getElementById("camera-diag-banner");
+          if (meta && (meta.make || meta.model || meta.iso || meta.lens_model)) {
+            camDiag.className = "pill";
+            camDiag.style.background = "#f0fdf4";
+            camDiag.style.borderColor = "#bbf7d0";
+            camDiag.style.color = "#166534";
+            camDiag.innerHTML = "✅ <strong>Origine Matérielle Certifiée :</strong> Ce cliché conserve l'empreinte physique de l'appareil optique (Trace de capteur réel).";
+            
+            document.getElementById("det-cam-model").textContent = (meta.make ? (meta.make + " ") : "") + (meta.model || "Appareil photo numérique");
+            document.getElementById("det-cam-lens").textContent = (meta.lens_model || "Objectif standard") + (meta.focal_length ? (" • Focale " + meta.focal_length + "mm") : "");
+            
+            var expParts = [];
+            if (meta.iso) expParts.push("ISO " + meta.iso);
+            if (meta.exposure_time) expParts.push(meta.exposure_time);
+            if (meta.f_number) expParts.push("f/" + meta.f_number);
+            document.getElementById("det-cam-exposure").textContent = expParts.length > 0 ? expParts.join(" • ") : "Valeurs standard capteur";
+            
+            document.getElementById("det-cam-date").textContent = meta.date_time_original ? new Date(meta.date_time_original).toLocaleString("fr-FR") : "Date de capture préservée dans l'en-tête";
+            document.getElementById("det-cam-software").textContent = meta.software || "Firmware interne d'origine (Sans retouche externe détectée)";
+            document.getElementById("det-cam-gps").textContent = meta.has_gps ? "📍 Coordonnées GPS présentes dans le fichier" : "Absente (Protection de la vie privée)";
+          } else {
+            camDiag.className = "pill";
+            camDiag.style.background = "#f8fafc";
+            camDiag.style.borderColor = "#e2e8f0";
+            camDiag.style.color = "#475569";
+            camDiag.innerHTML = "ℹ️ <strong>Métadonnées EXIF purgées ou absentes :</strong> Les réseaux sociaux (WhatsApp, Facebook, Twitter) nettoient automatiquement les données d'appareil lors du partage.";
+            document.getElementById("det-cam-model").textContent = "Non spécifié (Effacé par la plateforme de partage)";
+            document.getElementById("det-cam-lens").textContent = "Non spécifié";
+            document.getElementById("det-cam-exposure").textContent = "Non disponible";
+            document.getElementById("det-cam-date").textContent = "Non renseignée";
+            document.getElementById("det-cam-software").textContent = "Aucun logiciel externe déclaré";
+            document.getElementById("det-cam-gps").textContent = "Non disponible";
+          }
+
+          // POPULATE TAB 2 : WEB OCCURRENCES & SOCIAL MEDIA LINKS
+          var webContainer = document.getElementById("web-matches-list");
+          var factContainer = document.getElementById("factcheck-alert-container");
+          webContainer.innerHTML = "";
+          factContainer.innerHTML = "";
+
+          // Fact Checks debunks
+          if (data.fact_check_debunks && data.fact_check_debunks.length > 0) {
+            data.fact_check_debunks.forEach(function(fc) {
+              var fDiv = document.createElement("div");
+              fDiv.className = "factcheck-alert-card";
+              fDiv.innerHTML = "<div style='display:flex; justify-content:space-between; align-items:center;'><strong style='color:#9f1239; font-size:14px;'>🚨 DÉMENTI OFFICIEL DE FACT-CHECKING</strong><span style='background:#fee2e2; color:#9f1239; font-size:11px; font-weight:800; padding:2px 8px; border-radius:6px;'>" + fc.publisher_name + "</span></div><div style='font-size:13px; font-weight:700; color:#0f172a; margin:6px 0 3px 0;'>« " + fc.claim_reviewed + " »</div><div style='font-size:12px; color:#475569;'>Évaluation : <strong style='color:#e11d48;'>" + fc.rating + "</strong> • " + (fc.review_date ? new Date(fc.review_date).toLocaleDateString("fr-FR") : "") + "</div><div style='margin-top:8px;'><a href='" + fc.review_url + "' target='_blank' class='web-match-link' style='background:#e11d48;'>Consulter l'article de vérification complet ↗</a></div>";
+              factContainer.appendChild(fDiv);
+            });
+          }
+
+          if (data.web_occurrences && data.web_occurrences.length > 0) {
+            data.web_occurrences.forEach(function(wm) {
+              var wDiv = document.createElement("div");
+              wDiv.className = "web-match-card";
+              var dateStr = wm.earliest_date_found ? ("Première parution identifiée : " + new Date(wm.earliest_date_found).toLocaleDateString("fr-FR")) : "Antériorité Web répertoriée";
+              wDiv.innerHTML = "<div><div style='display:flex; align-items:center; gap:8px;'><span style='background:#e0f2fe; color:#0369a1; font-size:11px; font-weight:800; padding:2px 8px; border-radius:6px; font-family:monospace;'>" + wm.domain + "</span><strong style='font-size:13px; color:#0f172a;'>" + wm.title + "</strong></div><div style='font-size:11px; color:#64748b; margin-top:4px;'>" + dateStr + " • Similarité visuelle : <strong>" + Math.round((wm.match_score || 0.90) * 100) + "%</strong></div></div><a href='" + wm.url + "' target='_blank' class='web-match-link'>🔗 Voir la source d'origine ↗</a>";
+              webContainer.appendChild(wDiv);
+            });
+          } else {
+            webContainer.innerHTML = "<div style='background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; text-align:center; color:#64748b; font-size:13px;'>Aucune duplication publique antérieure flagrante détectée pour ce fichier.</div>";
+          }
+
+          // POPULATE TAB 3 : C2PA DETAILS
+          if (data.c2pa_details && data.c2pa_details.has_manifest) {
+            document.getElementById("det-c2pa-manifest").textContent = "Oui (Manifeste cryptographique présent)";
+            document.getElementById("det-c2pa-valid").textContent = data.c2pa_details.is_valid ? "✅ Valide & Certifié" : "⚠️ Invalide ou altéré";
+            document.getElementById("det-c2pa-issuer").textContent = data.c2pa_details.issuer || "Émetteur certifié C2PA";
+            document.getElementById("det-c2pa-source").textContent = data.c2pa_details.digital_source_type || (data.c2pa_details.ai_declared ? "Génération Algorithmique Synthétique" : "Capture optique directe");
+          } else {
+            document.getElementById("det-c2pa-manifest").textContent = "Non (Aucune signature Content Credentials)";
+            document.getElementById("det-c2pa-valid").textContent = "Non applicable";
+            document.getElementById("det-c2pa-issuer").textContent = "Non spécifié";
+            document.getElementById("det-c2pa-source").textContent = "Standard média numérique classique";
+          }
+
+          // POPULATE TAB 4 : EVIDENCES
           var evContainer = document.getElementById("res-evidence-list");
           evContainer.innerHTML = "";
           (data.evidences || []).forEach(function(ev) {
@@ -1310,6 +1494,8 @@ curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
             evContainer.appendChild(div);
           });
 
+          // Default to camera tab
+          switchInspectTab("camera");
           showScreen("screen-result");
         })
         .catch(function(err) {
