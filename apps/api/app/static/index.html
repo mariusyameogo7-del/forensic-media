@@ -79,7 +79,7 @@
         <div class="logo-icon">🛡️</div>
         <div>
           <div class="logo-title">Forensic Media</div>
-          <div class="logo-sub">Vérification Numérique</div>
+          <div class="logo-sub">Plateforme de Vérification Numérique</div>
         </div>
       </div>
       <nav>
@@ -94,9 +94,9 @@
     <!-- SCREEN 1 : UPLOAD -->
     <section id="screen-upload">
       <div class="hero">
-        <div class="pill">✨ Plateforme africaine de vérification de médias numériques</div>
+        <div class="pill">✨ Détection C2PA, IA Générative (ChatGPT, DALL·E 3, Midjourney) & Contexte Global</div>
         <h1>Vérifiez une image avant de la partager</h1>
-        <p>Analysez l'origine, l'intégrité et le contexte d'un média avec 4 dimensions indépendantes.</p>
+        <p>Analysez l'origine, l'intégrité, les signatures IA et le contexte Web avec 4 dimensions indépendantes.</p>
       </div>
 
       <div class="card">
@@ -106,7 +106,7 @@
           <div id="drop-prompt">
             <div class="drop-icon">📷</div>
             <div class="drop-title">Cliquez ou glissez une image ici</div>
-            <div class="drop-sub">Formats : JPG, PNG, WEBP (max 20 MiB)</div>
+            <div class="drop-sub">Compatible : Photos d'appareils, images ChatGPT / DALL·E 3, Midjourney, Firefly (JPG, PNG, WEBP)</div>
             <button type="button" class="btn-browse" onclick="document.getElementById('file-input').click()">Parcourir vos fichiers</button>
           </div>
 
@@ -121,20 +121,20 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Affirmation ou contexte accompagnant l'image (facultatif)</label>
-          <textarea id="claim-input" rows="2" placeholder="Exemple : « Photo prise aujourd'hui lors d'une manifestation à Ouagadougou. »"></textarea>
+          <label class="form-label">Affirmation, lieu ou contexte à vérifier (facultatif — fonctionne pour n'importe quelle ville ou pays)</label>
+          <textarea id="claim-input" rows="2" placeholder="Exemples : « Photo prise à Abidjan hier », « Mobilisation à Dakar », « Inondation à Paris », « Image créée par ChatGPT »..."></textarea>
         </div>
 
-        <button type="button" id="btn-submit" class="btn-submit" onclick="submitAnalysis()">Lancer l'analyse</button>
-        <div class="privacy-notice">🔒 Privacy-first — Le média original est supprimé du stockage après analyse.</div>
+        <button type="button" id="btn-submit" class="btn-submit" onclick="submitAnalysis()">Lancer l'analyse approfondie</button>
+        <div class="privacy-notice">🔒 Privacy-first — Le média original est purgé du stockage après analyse.</div>
       </div>
 
       <div class="sample-section">
-        <div class="sample-title">Ou consulter des vérifications réelles préparées :</div>
+        <div class="sample-title">Exemples de cas types préparés :</div>
         <div class="sample-btns">
-          <button class="btn-sample" onclick="loadSampleCase('photo_manifestation_ouaga.jpg')">📍 Cas 1 : Alerte Décontextualisation (Ouagadougou)</button>
-          <button class="btn-sample" onclick="loadSampleCase('photo_appareil_canon.jpg')">📷 Cas 2 : Cliché authentique avec EXIF</button>
-          <button class="btn-sample" onclick="loadSampleCase('portrait_ia_synthetique.png')">🤖 Cas 3 : Image synthétique</button>
+          <button class="btn-sample" onclick="loadSampleCase('photo_manifestation_ouaga.jpg')">📍 Cas 1 : Décontextualisation (Abidjan / Bamako / Dakar)</button>
+          <button class="btn-sample" onclick="loadSampleCase('photo_appareil_canon.jpg')">📷 Cas 2 : Cliché authentique avec EXIF d'appareil</button>
+          <button class="btn-sample" onclick="loadSampleCase('portrait_ia_synthetique.png')">🤖 Cas 3 : Image IA ChatGPT / DALL·E 3 (C2PA)</button>
         </div>
       </div>
     </section>
@@ -142,8 +142,8 @@
     <!-- SCREEN 2 : PROGRESS -->
     <section id="screen-progress" class="hidden">
       <div class="card progress-box">
-        <div class="pill">⏳ Analyse en cours...</div>
-        <h2 style="font-size:22px; font-weight:800; margin: 10px 0;">Examen technique du média</h2>
+        <div class="pill">⏳ Analyse criminalistique en cours...</div>
+        <h2 style="font-size:22px; font-weight:800; margin: 10px 0;">Examen multi-dimensionnel</h2>
         <div style="font-size:13px; color:#64748b;">Référence : <span id="progress-public-id" style="font-family:monospace; font-weight:700; color:#0f172a;">AN-...</span></div>
         
         <div class="progress-bar-bg">
@@ -151,10 +151,11 @@
         </div>
 
         <div style="text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; font-size:13px; line-height:1.8;">
+          <div>✓ Inspection des boîtes JUMBF et manifestes C2PA / Content Credentials (OpenAI, Adobe, Midjourney)</div>
           <div>✓ Calcul des empreintes cryptographiques (SHA-256) et perceptuelles (pHash)</div>
-          <div>✓ Analyse des métadonnées EXIF et vérification de signature C2PA</div>
-          <div>✓ Recherche de correspondances Web antérieures et fact-checks</div>
-          <div>⏳ Évaluation synthétique et rédaction des justifications...</div>
+          <div>✓ Analyse spectrale et détection d'artefacts de synthèse par IA</div>
+          <div>✓ Recherche de correspondances Web mondiales et vérifications de fact-checkers</div>
+          <div>⏳ Synthèse de la conclusion prudente...</div>
         </div>
       </div>
     </section>
@@ -170,13 +171,13 @@
           <div id="res-filename" style="font-size:12px; color:#64748b; margin-top:4px;">image.jpg</div>
         </div>
         <div style="display:flex; gap:10px;">
-          <button class="btn-pdf" onclick="downloadReportPdfDirect()">📄 Télécharger le PDF</button>
+          <button class="btn-pdf" onclick="downloadReportPdfDirect()">📄 Télécharger le Rapport PDF</button>
           <button class="btn-sample" onclick="showScreen('screen-upload')">+ Nouvelle analyse</button>
         </div>
       </div>
 
       <div id="res-claim-box" class="card" style="display:none; padding:14px; background:#f8fafc;">
-        <span class="form-label" style="margin-bottom:2px;">Affirmation analysée :</span>
+        <span class="form-label" style="margin-bottom:2px;">Affirmation ou contexte analysé :</span>
         <div id="res-claim-text" style="font-style:italic; font-size:13px; color:#334155;">« ... »</div>
       </div>
 
@@ -186,7 +187,7 @@
         <p id="res-summary" style="font-size:14px; line-height:1.6; color:#334155; background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #e2e8f0; margin-top:10px;"></p>
 
         <div style="margin-top:20px;">
-          <span class="form-label">Les 4 dimensions indépendantes</span>
+          <span class="form-label">Les 4 dimensions d'évaluation indépendantes</span>
           <div class="grid-4">
             <div class="ind-card">
               <span class="ind-label">1. Provenance</span>
@@ -209,8 +210,8 @@
       </div>
 
       <div class="card">
-        <h3 style="font-size:16px; font-weight:800; margin-bottom:6px;">Pourquoi cette conclusion ?</h3>
-        <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Éléments de preuve et constatations techniques adossées :</p>
+        <h3 style="font-size:16px; font-weight:800; margin-bottom:6px;">Pourquoi cette conclusion ? (Explicabilité & Preuves)</h3>
+        <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Constatations techniques adossées à chaque moteur :</p>
         <div id="res-evidence-list"></div>
       </div>
     </section>
@@ -220,7 +221,7 @@
       <div class="res-header">
         <div>
           <h2 style="font-size:22px; font-weight:800;">Historique des vérifications</h2>
-          <div style="font-size:12px; color:#64748b; margin-top:2px;">Analyses enregistrées dans la base de données.</div>
+          <div style="font-size:12px; color:#64748b; margin-top:2px;">Analyses enregistrées dans votre base Supabase PostgreSQL 17.</div>
         </div>
         <button class="btn-pdf" onclick="showScreen('screen-upload')">+ Nouvelle analyse</button>
       </div>
@@ -229,7 +230,7 @@
   </main>
 
   <footer>
-    Plateforme africaine de vérification numérique — Forensic Media MVP V1
+    Plateforme africaine de vérification numérique — Forensic Media Production
   </footer>
 
   <script>
@@ -306,7 +307,7 @@
 
     function submitAnalysis() {
       if (!selectedFile) {
-        alert("Veuillez d'abord selectionner ou glisser une image.");
+        alert("Veuillez d'abord sélectionner ou glisser une image.");
         return;
       }
 
@@ -317,7 +318,7 @@
 
       var btn = document.getElementById("btn-submit");
       btn.disabled = true;
-      btn.textContent = "Traitement en cours...";
+      btn.textContent = "Analyse approfondie en cours...";
 
       fetch("/api/v1/analyses", { method: "POST", body: formData })
         .then(function(res) {
@@ -332,7 +333,6 @@
           showScreen("screen-progress");
           document.getElementById("progress-public-id").textContent = data.public_id;
           
-          // Poll and transition
           pollProgress(data.analysis_id);
         })
         .catch(function(err) {
@@ -340,7 +340,7 @@
         })
         .finally(function() {
           btn.disabled = false;
-          btn.textContent = "Lancer l'analyse";
+          btn.textContent = "Lancer l'analyse approfondie";
         });
     }
 
@@ -418,7 +418,7 @@
           showScreen("screen-result");
         })
         .catch(function(err) {
-          alert("Erreur de chargement du resultat : " + err.message);
+          alert("Erreur de chargement du résultat : " + err.message);
         });
     }
 
@@ -439,7 +439,7 @@
         window.open(url, "_blank");
       })
       .catch(function() {
-        alert("Erreur lors du telechargement du rapport.");
+        alert("Erreur lors du téléchargement du rapport.");
       });
     }
 
@@ -453,7 +453,7 @@
         .then(function(data) {
           list.innerHTML = "";
           if (!data.items || data.items.length === 0) {
-            list.innerHTML = "<div class='card' style='text-align:center; color:#94a3b8;'>Aucune analyse trouvee.</div>";
+            list.innerHTML = "<div class='card' style='text-align:center; color:#94a3b8;'>Aucune analyse trouvée.</div>";
             return;
           }
           data.items.forEach(function(item) {
@@ -484,7 +484,7 @@
           }
         })
         .catch(function(e) {
-          alert("Erreur lors de la selection du cas.");
+          alert("Erreur lors de la sélection du cas.");
         });
     }
   </script>
