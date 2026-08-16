@@ -17,12 +17,12 @@
     .header-right { display: flex; align-items: center; gap: 12px; }
     .quota-badge { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
     .quota-badge.low { background: #fff1f2; border-color: #fecdd3; color: #9f1239; }
+    .quota-badge.pro { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+    .quota-badge.plus { background: #faf5ff; border-color: #e9d5ff; color: #7e22ce; }
     
     nav { display: flex; align-items: center; gap: 6px; }
     .nav-btn { background: none; border: none; font-size: 13px; font-weight: 600; color: #475569; padding: 8px 12px; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
     .nav-btn:hover, .nav-btn.active { color: #0284c7; background: #f1f5f9; }
-    .btn-auth-header { background: #0284c7; color: #ffffff; border: none; font-size: 12px; font-weight: 700; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
-    .btn-auth-header:hover { background: #0369a1; }
     .btn-admin { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 8px; cursor: pointer; }
     .btn-admin:hover { background: #e2e8f0; color: #0f172a; }
     
@@ -46,8 +46,8 @@
     
     .form-group { margin-top: 18px; }
     .form-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px; }
-    textarea, input[type="text"], input[type="email"], input[type="password"] { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; font-size: 14px; outline: none; font-family: inherit; }
-    textarea:focus, input:focus { border-color: #0284c7; }
+    textarea, input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; font-size: 14px; outline: none; font-family: inherit; }
+    textarea:focus, input:focus, select:focus { border-color: #0284c7; }
     
     .btn-submit { width: 100%; background: #0f172a; color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 18px; transition: background 0.2s; }
     .btn-submit:hover { background: #1e293b; }
@@ -87,16 +87,26 @@
     .btn-pdf:hover { background: #0369a1; }
     
     /* PRICING TAB */
-    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 24px; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 24px; }
     .pricing-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px 24px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
     .pricing-card.highlight { border: 2px solid #0284c7; box-shadow: 0 10px 25px -5px rgba(2,132,199,0.15); }
+    .pricing-card.premium { border: 2px solid #7e22ce; box-shadow: 0 10px 25px -5px rgba(126,34,206,0.15); background: #faf5ff; }
     .pricing-popular-badge { position: absolute; top: -12px; right: 20px; background: #0284c7; color: white; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; }
     .pricing-name { font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
     .pricing-desc { font-size: 13px; color: #64748b; margin-bottom: 16px; }
-    .pricing-price { font-size: 30px; font-weight: 900; color: #0f172a; margin-bottom: 4px; }
+    .pricing-price { font-size: 32px; font-weight: 900; color: #0f172a; margin-bottom: 4px; }
     .pricing-period { font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 20px; }
     .pricing-list { list-style: none; margin-bottom: 24px; font-size: 13px; line-height: 2.2; color: #334155; }
     .pricing-list li::before { content: "✓ "; color: #0284c7; font-weight: 800; }
+    .pricing-card.premium .pricing-list li::before { color: #7e22ce; }
+    
+    /* MOBILE MONEY PAYMENT MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.75); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-box { background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); position: relative; }
+    .operator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+    .operator-btn { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; background: #f8fafc; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; }
+    .operator-btn:hover, .operator-btn.selected { border-color: #0284c7; background: #f0f9ff; color: #0369a1; }
+    .operator-btn.selected { box-shadow: 0 0 0 2px #bae6fd; }
     
     /* AUTH TAB */
     .auth-box { max-width: 440px; margin: 20px auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
@@ -306,12 +316,12 @@
       <div id="my-history-list"></div>
     </section>
 
-    <!-- SCREEN 5 : ONGLET OFFRES & TARIFS (PRICING) -->
+    <!-- SCREEN 5 : ONGLET OFFRES & TARIFS (2 OFFRES PAYANTES : PRO & PLUS) -->
     <section id="screen-pricing" class="hidden">
       <div class="hero">
-        <div class="pill">💎 Formules & Abonnements</div>
-        <h1>Des offres adaptées à chaque besoin</h1>
-        <p>Vérifiez vos images en toute confiance, que vous soyez citoyen, journaliste d'investigation ou rédaction.</p>
+        <div class="pill">💎 Formules & Abonnements Mobile Money</div>
+        <h1>Choisissez la formule adaptée à vos besoins</h1>
+        <p>Paiement sécurisé par <strong>Orange Money, Moov Money, MTN MoMo, Wave ou Carte Bancaire</strong>.</p>
       </div>
 
       <div class="pricing-grid">
@@ -319,7 +329,7 @@
         <div class="pricing-card">
           <div>
             <div class="pricing-name">Essai Libre</div>
-            <div class="pricing-desc">Pour tester immédiatement sans création de compte.</div>
+            <div class="pricing-desc">Pour tester immédiatement la plateforme sans engagement.</div>
             <div class="pricing-price">0 FCFA</div>
             <div class="pricing-period">3 analyses gratuites au total</div>
             <ul class="pricing-list">
@@ -332,41 +342,44 @@
           <button class="btn-submit" style="margin-top:0; background:#f1f5f9; color:#0f172a; border:1px solid #cbd5e1;" onclick="showScreen('screen-upload')">Utiliser la version d'essai</button>
         </div>
 
-        <!-- Offre 2 : Compte Gratuit -->
-        <div class="pricing-card">
-          <div>
-            <div class="pricing-name">Compte Standard</div>
-            <div class="pricing-desc">Idéal pour les citoyens vigilants et créateurs de contenu.</div>
-            <div class="pricing-price">0 FCFA</div>
-            <div class="pricing-period">10 analyses gratuites / mois</div>
-            <ul class="pricing-list">
-              <li>10 analyses par mois</li>
-              <li>Historique personnel sauvegardé</li>
-              <li>Export de rapports PDF certifiés</li>
-              <li>Recherche de fact-checks africains & mondiaux</li>
-            </ul>
-          </div>
-          <button class="btn-submit" style="margin-top:0; background:#0f172a;" onclick="showScreen('screen-auth')">Créer un compte gratuit</button>
-        </div>
-
-        <!-- Offre 3 : Formule PRO -->
+        <!-- Offre 2 : Formule PRO (3 000 FCFA/mois) -->
         <div class="pricing-card highlight">
           <div class="pricing-popular-badge">Recommandé</div>
           <div>
             <div class="pricing-name">Formule PRO 👑</div>
-            <div class="pricing-desc">Pour les journalistes, fact-checkers et professionnels des médias.</div>
-            <div class="pricing-price">5 000 FCFA <span style="font-size:14px; font-weight:600; color:#64748b;">/ mois</span></div>
-            <div class="pricing-period">ou 50 000 FCFA / an (2 mois offerts)</div>
+            <div class="pricing-desc">Pour les journalistes indépendants, vérificateurs et créateurs.</div>
+            <div class="pricing-price">3 000 FCFA <span style="font-size:14px; font-weight:600; color:#64748b;">/ mois</span></div>
+            <div class="pricing-period">ou 30 000 FCFA / an (2 mois offerts)</div>
             <ul class="pricing-list">
-              <li><strong>Analyses illimitées</strong></li>
-              <li>Traitement prioritaire instantané</li>
-              <li>Rapports PDF Haute Définition sans filigrane</li>
-              <li>Détection poussée Midjourney, DALL·E 3, Flux</li>
-              <li>Accès clé API Développeur</li>
-              <li>Support technique prioritaire 7j/7</li>
+              <li><strong>100 analyses / mois</strong></li>
+              <li>Détection poussée ChatGPT, DALL·E 3, Midjourney</li>
+              <li>Rapports PDF certifiés sans filigrane</li>
+              <li>Antériorités Web mondiales & Fact-checks</li>
+              <li>Traitement prioritaire ultra-rapide</li>
+              <li>Support technique 7j/7</li>
             </ul>
           </div>
-          <button class="btn-submit" style="margin-top:0; background:#0284c7;" onclick="alert('La souscription PRO en ligne via Mobile Money / Carte est en cours de finalisation ! Vos crédits sont débloqués pour vos tests.'); resetTrialCredits(); showScreen('screen-upload');">Souscrire à l'offre PRO</button>
+          <button class="btn-submit" style="margin-top:0; background:#0284c7;" onclick="openPaymentModal('pro', 3000)">Souscrire à PRO (3 000 FCFA)</button>
+        </div>
+
+        <!-- Offre 3 : Formule PLUS (10 000 FCFA/mois) -->
+        <div class="pricing-card premium">
+          <div class="pricing-popular-badge" style="background:#7e22ce;">Entreprises & Rédactions</div>
+          <div>
+            <div class="pricing-name" style="color:#7e22ce;">Formule PLUS 🚀</div>
+            <div class="pricing-desc">Pour les rédactions, agences de presse, institutions et entreprises.</div>
+            <div class="pricing-price" style="color:#7e22ce;">10 000 FCFA <span style="font-size:14px; font-weight:600; color:#64748b;">/ mois</span></div>
+            <div class="pricing-period">ou 100 000 FCFA / an (2 mois offerts)</div>
+            <ul class="pricing-list">
+              <li><strong>Analyses 100% ILLIMITÉES</strong></li>
+              <li><strong>Accès Clé API Développeur & Webhooks</strong></li>
+              <li>Intégration directe CMS & Flux de publication</li>
+              <li>Rapports PDF HD personnalisables avec logo</li>
+              <li>Multi-utilisateurs & Équipe rédaction</li>
+              <li>Support dédié 24h/24 & SLA 99.9%</li>
+            </ul>
+          </div>
+          <button class="btn-submit" style="margin-top:0; background:#7e22ce;" onclick="openPaymentModal('plus', 10000)">Souscrire à PLUS (10 000 FCFA)</button>
         </div>
       </div>
     </section>
@@ -375,15 +388,15 @@
     <section id="screen-auth" class="hidden">
       <div class="hero">
         <div class="pill">🔐 Espace Membre</div>
-        <h1 id="auth-main-title">Rejoignez Forensic Media</h1>
-        <p>Créez votre compte pour sauvegarder vos vérifications et obtenir 10 analyses gratuites par mois.</p>
+        <h1 id="auth-main-title">Espace Utilisateur</h1>
+        <p>Gérez votre compte, vos abonnements Pro/Plus et votre historique.</p>
       </div>
 
       <div class="auth-box">
         <div id="auth-logged-in-view" class="hidden" style="text-align:center;">
           <div style="font-size:40px; margin-bottom:10px;">👤</div>
           <h3 id="auth-user-email" style="font-weight:800; font-size:16px;">utilisateur@example.com</h3>
-          <div style="font-size:12px; color:#16a34a; font-weight:700; margin:6px 0 16px 0;">Compte Actif (10 analyses / mois)</div>
+          <div id="auth-user-plan" style="font-size:13px; color:#0284c7; font-weight:800; margin:6px 0 16px 0;">Compte Actif</div>
           <button class="btn-submit" style="background:#0284c7; margin-top:0;" onclick="showScreen('screen-upload')">Lancer une analyse</button>
           <button class="btn-admin" style="width:100%; margin-top:8px;" onclick="logoutUser()">Se déconnecter</button>
         </div>
@@ -454,6 +467,43 @@
     </section>
   </main>
 
+  <!-- MODAL PAIEMENT MOBILE MONEY -->
+  <div id="modal-payment" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="momo-plan-badge" class="pill" style="margin:0;">Paiement Mobile Money</span>
+        <button style="background:none; border:none; font-size:18px; font-weight:700; cursor:pointer;" onclick="closeModal('modal-payment')">✕</button>
+      </div>
+
+      <h2 id="momo-title" style="font-size:20px; font-weight:800; margin-top:12px;">Souscription Formule PRO</h2>
+      <div style="font-size:13px; color:#64748b; margin-top:2px;">Montant à régler : <strong id="momo-amount" style="color:#0f172a; font-size:16px;">3 000 FCFA</strong></div>
+
+      <div style="margin-top:16px;">
+        <label class="form-label">1. Choisissez votre opérateur</label>
+        <div class="operator-grid">
+          <div id="op-orange" class="operator-btn selected" onclick="selectOperator('orange_money')">🟠 Orange Money</div>
+          <div id="op-moov" class="operator-btn" onclick="selectOperator('moov_money')">🔵 Moov Money</div>
+          <div id="op-mtn" class="operator-btn" onclick="selectOperator('mtn_momo')">🟡 MTN MoMo</div>
+          <div id="op-wave" class="operator-btn" onclick="selectOperator('wave')">🌊 Wave</div>
+          <div id="op-card" class="operator-btn" style="grid-column: span 2;" onclick="selectOperator('card')">💳 Carte Bancaire (Visa / Mastercard)</div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:12px;">
+        <label class="form-label">2. Votre Numéro de Téléphone Mobile Money</label>
+        <input type="tel" id="momo-phone" placeholder="Ex : +226 70 00 00 00 ou +225 07 00 00 00" value="+226 70 11 22 33">
+      </div>
+
+      <div id="momo-instructions-box" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; font-size:12px; color:#0369a1; margin-top:12px;">
+        💡 <strong>Instructions :</strong> Composez le <strong>#144*4*6#</strong> sur votre téléphone ou validez la notification push de prélèvement.
+      </div>
+
+      <button type="button" id="btn-momo-pay" class="btn-submit" style="background:#0284c7; margin-top:16px;" onclick="executeMobileMoneyPayment()">Payer maintenant</button>
+      
+      <div style="text-align:center; font-size:11px; color:#94a3b8; margin-top:10px;">🔒 Transaction sécurisée par passerelle FedaPay / CinetPay Pan-Afrique</div>
+    </div>
+  </div>
+
   <footer>
     Plateforme africaine de vérification numérique — Forensic Media Production
   </footer>
@@ -462,9 +512,13 @@
     var currentAnalysisId = null;
     var selectedFile = null;
     var currentAuthMode = "register";
+    var currentSelectedPlan = "pro";
+    var currentSelectedOperator = "orange_money";
+    var currentPlanAmount = 3000;
     var adminKey = localStorage.getItem("forensic_admin_key") || "";
     var userToken = localStorage.getItem("forensic_user_token") || "";
     var userEmail = localStorage.getItem("forensic_user_email") || "";
+    var userPlan = localStorage.getItem("forensic_user_plan") || "trial";
 
     function checkAuthState() {
       if (userToken && userEmail) {
@@ -472,6 +526,7 @@
         document.getElementById("auth-form-view").classList.add("hidden");
         document.getElementById("auth-logged-in-view").classList.remove("hidden");
         document.getElementById("auth-user-email").textContent = userEmail;
+        document.getElementById("auth-user-plan").textContent = "Formule Active : " + userPlan.toUpperCase();
       } else {
         document.getElementById("nav-auth").textContent = "Connexion / Compte";
         document.getElementById("auth-form-view").classList.remove("hidden");
@@ -483,7 +538,8 @@
 
     // Quota management
     function getRemainingCredits() {
-      if (userToken) return 10; // Registered accounts have full quota
+      if (userPlan === "plus") return 9999;
+      if (userPlan === "pro") return 100;
       var c = localStorage.getItem("forensic_free_credits");
       if (c === null) {
         localStorage.setItem("forensic_free_credits", "3");
@@ -493,15 +549,19 @@
     }
 
     function updateQuotaDisplay() {
-      var credits = getRemainingCredits();
       var countEl = document.getElementById("quota-count");
       var badgeEl = document.getElementById("quota-display");
-      if (userToken) {
-        badgeEl.innerHTML = "<span>👤 Membre Inscrit :</span><strong>Actif (10/mois)</strong>";
-        badgeEl.className = "quota-badge";
+
+      if (userPlan === "plus") {
+        badgeEl.className = "quota-badge plus";
+        badgeEl.innerHTML = "<span>🚀 Formule PLUS :</span><strong>Illimité (Actif)</strong>";
+      } else if (userPlan === "pro") {
+        badgeEl.className = "quota-badge pro";
+        badgeEl.innerHTML = "<span>👑 Formule PRO :</span><strong>100 / mois (Actif)</strong>";
       } else {
-        badgeEl.innerHTML = "<span>⭐ Crédits d'essai :</span><strong>" + credits + " / 3</strong>";
+        var credits = getRemainingCredits();
         badgeEl.className = (credits <= 1) ? "quota-badge low" : "quota-badge";
+        badgeEl.innerHTML = "<span>⭐ Crédits d'essai :</span><strong>" + credits + " / 3</strong>";
       }
     }
 
@@ -603,6 +663,90 @@
       window.scrollTo(0, 0);
     }
 
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+    // Payment Modal Logic
+    function openPaymentModal(plan, amount) {
+      currentSelectedPlan = plan;
+      currentPlanAmount = amount;
+      document.getElementById("momo-title").textContent = (plan === "pro") ? "Souscription Formule PRO 👑" : "Souscription Formule PLUS 🚀";
+      document.getElementById("momo-amount").textContent = amount.toLocaleString("fr-FR") + " FCFA / mois";
+      document.getElementById("modal-payment").classList.remove("hidden");
+    }
+
+    function selectOperator(op) {
+      currentSelectedOperator = op;
+      var ops = ["orange", "moov", "mtn", "wave", "card"];
+      ops.forEach(function(k) {
+        var el = document.getElementById("op-" + k);
+        if (el) el.classList.remove("selected");
+      });
+
+      var mapKey = { "orange_money": "orange", "moov_money": "moov", "mtn_momo": "mtn", "wave": "wave", "card": "card" };
+      document.getElementById("op-" + mapKey[op]).classList.add("selected");
+
+      var box = document.getElementById("momo-instructions-box");
+      if (op === "orange_money") box.innerHTML = "💡 <strong>Instructions :</strong> Composez le <strong>#144*4*6#</strong> sur votre téléphone ou validez la notification push Orange Money.";
+      else if (op === "moov_money") box.innerHTML = "💡 <strong>Instructions :</strong> Composez le <strong>*155*4#</strong> sur votre téléphone ou confirmez par message Moov Money.";
+      else if (op === "mtn_momo") box.innerHTML = "💡 <strong>Instructions :</strong> Validez l'autorisation sur votre app <strong>MTN MoMo</strong> ou tapez <strong>*133#</strong>.";
+      else if (op === "wave") box.innerHTML = "💡 <strong>Instructions :</strong> Ouvrez votre application <strong>Wave</strong> pour confirmer le débit instantané.";
+      else box.innerHTML = "💡 <strong>Instructions :</strong> Redirection vers le serveur de paiement sécurisé Visa / Mastercard.";
+    }
+
+    function executeMobileMoneyPayment() {
+      var phone = document.getElementById("momo-phone").value;
+      var btn = document.getElementById("btn-momo-pay");
+      btn.disabled = true;
+      btn.textContent = "Initiation du paiement Mobile Money...";
+
+      var payload = {
+        plan: currentSelectedPlan,
+        operator: currentSelectedOperator,
+        phone_number: phone,
+        customer_email: userEmail || "client@forensic.org",
+        billing_cycle: "monthly"
+      };
+
+      var headers = { "Content-Type": "application/json" };
+      if (userToken) headers["Authorization"] = "Bearer " + userToken;
+
+      fetch("/api/v1/payments/initiate", {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(payload)
+      })
+      .then(function(res) {
+        if (!res.ok) throw new Error("Erreur d'initiation du paiement");
+        return res.json();
+      })
+      .then(function(data) {
+        btn.textContent = "Confirmation du débit sur votre téléphone...";
+        
+        // Auto-confirm payment transaction
+        setTimeout(function() {
+          fetch("/api/v1/payments/confirm/" + data.transaction_ref, { method: "POST", headers: headers })
+            .then(function(r) { return r.json(); })
+            .then(function(resConfirm) {
+              userPlan = currentSelectedPlan;
+              localStorage.setItem("forensic_user_plan", currentSelectedPlan);
+              updateQuotaDisplay();
+              closeModal("modal-payment");
+              btn.disabled = false;
+              btn.textContent = "Payer maintenant";
+              alert("🎉 " + resConfirm.message_fr);
+              showScreen("screen-upload");
+            });
+        }, 1000);
+      })
+      .catch(function(err) {
+        alert(err.message);
+        btn.disabled = false;
+        btn.textContent = "Payer maintenant";
+      });
+    }
+
     // Auth logic
     function switchAuthTab(mode) {
       currentAuthMode = mode;
@@ -644,11 +788,13 @@
       .then(function(data) {
         userToken = data.access_token;
         userEmail = data.user.email;
+        userPlan = data.user.account_type === "professional" ? "pro" : (data.user.account_type === "institutional" ? "plus" : "trial");
         localStorage.setItem("forensic_user_token", userToken);
         localStorage.setItem("forensic_user_email", userEmail);
+        localStorage.setItem("forensic_user_plan", userPlan);
         checkAuthState();
         updateQuotaDisplay();
-        alert(currentAuthMode === "register" ? "Compte créé avec succès ! Vous bénéficiez désormais de votre espace personnel." : "Connexion réussie !");
+        alert(currentAuthMode === "register" ? "Compte créé avec succès !" : "Connexion réussie !");
         showScreen("screen-upload");
       })
       .catch(function(err) {
@@ -659,8 +805,10 @@
     function logoutUser() {
       userToken = "";
       userEmail = "";
+      userPlan = "trial";
       localStorage.removeItem("forensic_user_token");
       localStorage.removeItem("forensic_user_email");
+      localStorage.removeItem("forensic_user_plan");
       checkAuthState();
       updateQuotaDisplay();
       alert("Vous êtes déconnecté.");
@@ -674,7 +822,7 @@
       }
 
       var credits = getRemainingCredits();
-      if (credits <= 0 && !userToken) {
+      if (credits <= 0 && userPlan === "trial") {
         showScreen("screen-pricing");
         return;
       }
@@ -703,8 +851,8 @@
             addMyToken(data.access_token);
           }
 
-          // Decrement credits if guest
-          if (!userToken) {
+          // Decrement credits if trial
+          if (userPlan === "trial") {
             localStorage.setItem("forensic_free_credits", String(Math.max(0, credits - 1)));
             updateQuotaDisplay();
           }

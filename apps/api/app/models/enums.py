@@ -8,6 +8,30 @@ class AccountType(str, enum.Enum):
     ADMIN = "admin"
 
 
+class SubscriptionPlan(str, enum.Enum):
+    TRIAL = "trial"
+    PRO = "pro"
+    PLUS = "plus"
+
+
+class PaymentStatus(str, enum.Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELED = "canceled"
+
+
+class PaymentOperator(str, enum.Enum):
+    ORANGE_MONEY = "orange_money"
+    MOOV_MONEY = "moov_money"
+    MTN_MOMO = "mtn_momo"
+    WAVE = "wave"
+    CARD = "card"
+    FEDAPAY = "fedapay"
+    CINETPAY = "cinetpay"
+
+
 class AnalysisStatus(str, enum.Enum):
     PENDING = "pending"
     RUNNING = "running"

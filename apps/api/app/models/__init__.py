@@ -1,5 +1,8 @@
 from apps.api.app.models.enums import (
     AccountType,
+    SubscriptionPlan,
+    PaymentStatus,
+    PaymentOperator,
     AnalysisStatus,
     ConclusionLevel,
     ProvenanceStatus,
@@ -14,6 +17,7 @@ from apps.api.app.models.enums import (
     WebMatchType,
 )
 from apps.api.app.models.user import User, UserPreferences
+from apps.api.app.models.payment import Payment, Subscription
 from apps.api.app.models.analysis import Analysis
 from apps.api.app.models.access_token import AnalysisAccessToken
 from apps.api.app.models.stored_object import StoredObject
@@ -32,6 +36,9 @@ from apps.api.app.models.event import AnalysisEvent
 __all__ = [
     # Enums
     "AccountType",
+    "SubscriptionPlan",
+    "PaymentStatus",
+    "PaymentOperator",
     "AnalysisStatus",
     "ConclusionLevel",
     "ProvenanceStatus",
@@ -44,9 +51,11 @@ __all__ = [
     "EvidenceType",
     "EvidenceSeverity",
     "WebMatchType",
-    # 15 Entities
+    # Entities
     "User",
     "UserPreferences",
+    "Payment",
+    "Subscription",
     "Analysis",
     "AnalysisAccessToken",
     "StoredObject",
