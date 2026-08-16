@@ -1,10 +1,10 @@
 services:
-  # 1. FastAPI Web Service (Render Frankfurt)
+  # 1. FastAPI Backend API (Render Frankfurt)
   - type: web
     name: forensic-media-api
     env: docker
     region: fra
-    plan: standard
+    plan: free
     dockerfilePath: infra/docker/api.Dockerfile
     dockerContext: .
     healthCheckPath: /api/v1/health
@@ -12,68 +12,36 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: DEBUG
-        value: false
+        value: "false"
       - key: API_V1_STR
         value: /api/v1
       - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: forensic-media-redis
-          property: connectionString
-      - key: CELERY_BROKER_URL
-        fromService:
-          type: redis
-          name: forensic-media-redis
-          property: connectionString
+        value: postgresql+psycopg://postgres.qabyrfzkrbqxldfybnid:Q9%2BR%25v3b2ny.Wt.@aws-1-eu-west-1.pooler.supabase.com:6543/postgres
       - key: SUPABASE_URL
-        sync: false
+        value: https://qabyrfzkrbqxldfybnid.supabase.co
       - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false
+        value: sb_secret_KUH_xLu9b5Vmekq86_Sd6g_jpCQVA6o
+      - key: SUPABASE_ANON_KEY
+        value: sb_publishable_2t8bdDFBnJ-WKA1mM7-jbQ_r65ElgnA
       - key: SUPABASE_JWT_SECRET
-        sync: false
-      - key: HIVE_API_KEY
-        sync: false
-      - key: GOOGLE_FACT_CHECK_API_KEY
-        sync: false
+        value: 0pfEAX3o00mbgNw+etAA5uPOrl7GOuwlk+p9UopYOswv8Hw/krMgXtKPzx2set9n/RxuKdr5oQ7oB0aF0iIi0Q==
+      - key: STORAGE_BUCKET_ORIGINALS
+        value: media-originals
+      - key: STORAGE_BUCKET_PREVIEWS
+        value: media-previews
+      - key: STORAGE_BUCKET_REPORTS
+        value: analysis-reports
 
-  # 2. Celery Worker Service (Render Frankfurt)
-  - type: worker
-    name: forensic-media-worker
-    env: docker
-    region: fra
-    plan: standard
-    dockerfilePath: infra/docker/worker.Dockerfile
-    dockerContext: .
-    envVars:
-      - key: ENVIRONMENT
-        value: production
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: forensic-media-redis
-          property: connectionString
-      - key: CELERY_BROKER_URL
-        fromService:
-          type: redis
-          name: forensic-media-redis
-          property: connectionString
-      - key: SUPABASE_URL
-        sync: false
-      - key: SUPABASE_SERVICE_ROLE_KEY
-        sync: false
-      - key: HIVE_API_KEY
-        sync: false
-      - key: GOOGLE_FACT_CHECK_API_KEY
-        sync: false
-
-# 3. Redis Instance (Render Frankfurt)
-redis:
-  - name: forensic-media-redis
+  # 2. Next.js / Web Application (Render Frankfurt)
+  - type: web
+    name: forensic-media-web
+    env: node
     region: fra
     plan: free
-    maxmemoryPolicy: noeviction
-    ipAllowList: [] # Private access only
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: https://qabyrfzkrbqxldfybnid.supabase.co
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        value: sb_publishable_2t8bdDFBnJ-WKA1mM7-jbQ_r65ElgnA

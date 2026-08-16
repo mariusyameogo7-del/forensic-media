@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 COPY apps/api /app/apps/api
 COPY workers/analysis /app/workers/analysis
 
-ENV PYTHONPATH="/app/apps/api:/app/workers/analysis:${PYTHONPATH}"
+ENV PYTHONPATH="/app:/app/apps/api:/app/workers/analysis:${PYTHONPATH}"
 
 EXPOSE 8000
 
-CMD ["uvicorn", "apps.api.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["sh", "-c", "uvicorn apps.api.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

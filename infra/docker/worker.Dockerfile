@@ -30,6 +30,6 @@ RUN pip install --no-cache-dir -r /app/worker-requirements.txt
 COPY apps/api /app/apps/api
 COPY workers/analysis /app/workers/analysis
 
-ENV PYTHONPATH="/app/apps/api:/app/workers/analysis:${PYTHONPATH}"
+ENV PYTHONPATH="/app:/app/apps/api:/app/workers/analysis:${PYTHONPATH}"
 
 CMD ["celery", "-A", "worker.celery_app:celery_app", "worker", "--loglevel=info", "-c", "2"]
