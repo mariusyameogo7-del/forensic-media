@@ -100,13 +100,19 @@
     .pricing-list li::before { content: "✓ "; color: #0284c7; font-weight: 800; }
     .pricing-card.premium .pricing-list li::before { color: #7e22ce; }
     
-    /* MOBILE MONEY PAYMENT MODAL */
+    /* MOBILE MONEY & CARD PAYMENT MODAL */
     .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.75); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .modal-box { background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); position: relative; }
-    .operator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
-    .operator-btn { border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px; text-align: center; cursor: pointer; background: #f8fafc; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; }
+    .modal-box { background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); position: relative; max-height: 90vh; overflow-y: auto; }
+    
+    .pay-methods-tabs { display: flex; gap: 8px; margin: 16px 0 12px 0; }
+    .pay-method-tab { flex: 1; border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; font-weight: 700; font-size: 13px; text-align: center; cursor: pointer; background: #f8fafc; color: #64748b; }
+    .pay-method-tab.active { border-color: #0284c7; background: #f0f9ff; color: #0369a1; }
+    
+    .operator-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .operator-btn { border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px; text-align: center; cursor: pointer; background: #f8fafc; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .operator-btn:hover, .operator-btn.selected { border-color: #0284c7; background: #f0f9ff; color: #0369a1; }
-    .operator-btn.selected { box-shadow: 0 0 0 2px #bae6fd; }
+    
+    .card-fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     
     /* AUTH TAB */
     .auth-box { max-width: 440px; margin: 20px auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
@@ -319,9 +325,9 @@
     <!-- SCREEN 5 : ONGLET OFFRES & TARIFS (2 OFFRES PAYANTES : PRO & PLUS) -->
     <section id="screen-pricing" class="hidden">
       <div class="hero">
-        <div class="pill">💎 Formules & Abonnements Mobile Money</div>
+        <div class="pill">💎 Formules & Abonnements Sécurisés</div>
         <h1>Choisissez la formule adaptée à vos besoins</h1>
-        <p>Paiement sécurisé par <strong>Orange Money, Moov Money, MTN MoMo, Wave ou Carte Bancaire</strong>.</p>
+        <p>Paiement sécurisé par <strong>Orange Money, Moov Money, MTN MoMo, Wave ou Carte Bancaire (Visa / Mastercard)</strong>.</p>
       </div>
 
       <div class="pricing-grid">
@@ -467,40 +473,101 @@
     </section>
   </main>
 
-  <!-- MODAL PAIEMENT MOBILE MONEY -->
+  <!-- MODAL DE PAIEMENT SÉCURISÉ (MOBILE MONEY & CARTE BANCAIRE) -->
   <div id="modal-payment" class="modal-overlay hidden">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span id="momo-plan-badge" class="pill" style="margin:0;">Paiement Mobile Money</span>
+        <span id="momo-plan-badge" class="pill" style="margin:0;">Passerelle de Paiement Sécurisée</span>
         <button style="background:none; border:none; font-size:18px; font-weight:700; cursor:pointer;" onclick="closeModal('modal-payment')">✕</button>
       </div>
 
-      <h2 id="momo-title" style="font-size:20px; font-weight:800; margin-top:12px;">Souscription Formule PRO</h2>
-      <div style="font-size:13px; color:#64748b; margin-top:2px;">Montant à régler : <strong id="momo-amount" style="color:#0f172a; font-size:16px;">3 000 FCFA</strong></div>
+      <!-- VUE ÉTAPE 1 : SAISIE DES INFORMATIONS DE PAIEMENT -->
+      <div id="pay-step-1">
+        <h2 id="momo-title" style="font-size:20px; font-weight:800; margin-top:12px;">Souscription Formule PRO</h2>
+        <div style="font-size:13px; color:#64748b; margin-top:2px;">Montant à régler : <strong id="momo-amount" style="color:#0f172a; font-size:16px;">3 000 FCFA</strong></div>
 
-      <div style="margin-top:16px;">
-        <label class="form-label">1. Choisissez votre opérateur</label>
-        <div class="operator-grid">
-          <div id="op-orange" class="operator-btn selected" onclick="selectOperator('orange_money')">🟠 Orange Money</div>
-          <div id="op-moov" class="operator-btn" onclick="selectOperator('moov_money')">🔵 Moov Money</div>
-          <div id="op-mtn" class="operator-btn" onclick="selectOperator('mtn_momo')">🟡 MTN MoMo</div>
-          <div id="op-wave" class="operator-btn" onclick="selectOperator('wave')">🌊 Wave</div>
-          <div id="op-card" class="operator-btn" style="grid-column: span 2;" onclick="selectOperator('card')">💳 Carte Bancaire (Visa / Mastercard)</div>
+        <!-- Onglets Choix du Moyen : Mobile Money VS Carte Bancaire -->
+        <div class="pay-methods-tabs">
+          <div id="tab-mode-momo" class="pay-method-tab active" onclick="switchPayMode('momo')">📱 Mobile Money</div>
+          <div id="tab-mode-card" class="pay-method-tab" onclick="switchPayMode('card')">💳 Carte Bancaire (Visa/Mastercard)</div>
         </div>
+
+        <!-- BLOC A : MOBILE MONEY -->
+        <div id="view-pay-momo">
+          <label class="form-label">Sélectionnez votre opérateur Mobile Money</label>
+          <div class="operator-grid">
+            <div id="op-orange" class="operator-btn selected" onclick="selectOperator('orange_money')">🟠 Orange Money</div>
+            <div id="op-moov" class="operator-btn" onclick="selectOperator('moov_money')">🔵 Moov Money</div>
+            <div id="op-mtn" class="operator-btn" onclick="selectOperator('mtn_momo')">🟡 MTN MoMo</div>
+            <div id="op-wave" class="operator-btn" onclick="selectOperator('wave')">🌊 Wave</div>
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">Numéro de Téléphone Mobile Money</label>
+            <input type="tel" id="momo-phone" placeholder="Ex : +226 70 11 22 33 ou +225 07 00 00 00" value="+226 70 11 22 33">
+          </div>
+
+          <div id="momo-instructions-box" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; font-size:12px; color:#0369a1; margin-top:12px;">
+            💡 <strong>Procédure :</strong> Après validation, composez le <strong>#144*4*6#</strong> sur votre téléphone pour générer votre code OTP à 4 chiffres.
+          </div>
+        </div>
+
+        <!-- BLOC B : CARTE BANCAIRE (VISA / MASTERCARD) -->
+        <div id="view-pay-card" class="hidden">
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">Nom sur la Carte Bancaire</label>
+            <input type="text" id="card-holder" placeholder="Ex : MARIUS YAMEOGO">
+          </div>
+
+          <div class="form-group" style="margin-top:10px;">
+            <label class="form-label">Numéro de Carte (16 chiffres)</label>
+            <input type="text" id="card-number" placeholder="4485 0000 1234 5678" maxlength="19" oninput="formatCardNumber(this)">
+          </div>
+
+          <div class="card-fields-grid">
+            <div class="form-group" style="margin-top:0;">
+              <label class="form-label">Expiration (MM/AA)</label>
+              <input type="text" id="card-expiry" placeholder="08/28" maxlength="5">
+            </div>
+            <div class="form-group" style="margin-top:0;">
+              <label class="form-label">Cryptogramme CVV</label>
+              <input type="password" id="card-cvv" placeholder="123" maxlength="4">
+            </div>
+          </div>
+
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; font-size:11px; color:#64748b; margin-top:12px; display:flex; align-items:center; gap:8px;">
+            <span>🔒</span>
+            <span>Paiement chiffré SSL 256 bits et protégé par authentification <strong>3D-Secure</strong>.</span>
+          </div>
+        </div>
+
+        <button type="button" id="btn-momo-init" class="btn-submit" style="background:#0284c7; margin-top:16px;" onclick="initiatePaymentStep()">Valider et Débiter le Montant</button>
       </div>
 
-      <div class="form-group" style="margin-top:12px;">
-        <label class="form-label">2. Votre Numéro de Téléphone Mobile Money</label>
-        <input type="tel" id="momo-phone" placeholder="Ex : +226 70 00 00 00 ou +225 07 00 00 00" value="+226 70 11 22 33">
+      <!-- VUE ÉTAPE 2 : VALIDATION RÉELLE AVEC CODE OTP / 3D-SECURE -->
+      <div id="pay-step-2" class="hidden">
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="font-size:36px; margin-bottom:6px;">📲</div>
+          <h3 style="font-size:18px; font-weight:800;">Confirmation du Débit Sécurisé</h3>
+          <div style="font-size:12px; color:#64748b; margin-top:2px;">Réf : <strong id="step2-tx-ref" style="font-family:monospace; color:#0f172a;">PAY-...</strong></div>
+        </div>
+
+        <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px; padding:14px; margin-bottom:16px;">
+          <div style="font-size:13px; font-weight:700; color:#0369a1;" id="step2-instructions">Instructions de validation</div>
+          <div style="font-size:12px; color:#475569; margin-top:4px;" id="step2-sub-instructions">Veuillez saisir le code d'autorisation reçu sur votre téléphone ou généré par USSD.</div>
+        </div>
+
+        <div class="form-group" style="margin-top:0;">
+          <label class="form-label">Saisir le Code d'autorisation OTP / 3D-Secure (4 à 6 chiffres)</label>
+          <input type="text" id="otp-input" placeholder="Ex : 1234" maxlength="6" style="text-align:center; font-size:22px; font-weight:900; letter-spacing:4px;">
+        </div>
+
+        <button type="button" id="btn-momo-confirm" class="btn-submit" style="background:#16a34a; margin-top:16px;" onclick="confirmOtpPaymentStep()">Confirmer et Activer l'Abonnement</button>
+        
+        <button type="button" class="btn-sample" style="width:100%; margin-top:8px;" onclick="backToStep1()">← Revenir en arrière</button>
       </div>
 
-      <div id="momo-instructions-box" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; font-size:12px; color:#0369a1; margin-top:12px;">
-        💡 <strong>Instructions :</strong> Composez le <strong>#144*4*6#</strong> sur votre téléphone ou validez la notification push de prélèvement.
-      </div>
-
-      <button type="button" id="btn-momo-pay" class="btn-submit" style="background:#0284c7; margin-top:16px;" onclick="executeMobileMoneyPayment()">Payer maintenant</button>
-      
-      <div style="text-align:center; font-size:11px; color:#94a3b8; margin-top:10px;">🔒 Transaction sécurisée par passerelle FedaPay / CinetPay Pan-Afrique</div>
+      <div style="text-align:center; font-size:11px; color:#94a3b8; margin-top:12px;">🔒 Transaction certifiée par la passerelle FedaPay / CinetPay Pan-Afrique</div>
     </div>
   </div>
 
@@ -513,8 +580,11 @@
     var selectedFile = null;
     var currentAuthMode = "register";
     var currentSelectedPlan = "pro";
+    var currentPayMode = "momo"; // "momo" or "card"
     var currentSelectedOperator = "orange_money";
     var currentPlanAmount = 3000;
+    var currentPendingTxRef = null;
+    
     var adminKey = localStorage.getItem("forensic_admin_key") || "";
     var userToken = localStorage.getItem("forensic_user_token") || "";
     var userEmail = localStorage.getItem("forensic_user_email") || "";
@@ -665,6 +735,13 @@
 
     function closeModal(id) {
       document.getElementById(id).classList.add("hidden");
+      backToStep1();
+    }
+
+    function backToStep1() {
+      document.getElementById("pay-step-1").classList.remove("hidden");
+      document.getElementById("pay-step-2").classList.add("hidden");
+      document.getElementById("otp-input").value = "";
     }
 
     // Payment Modal Logic
@@ -673,41 +750,104 @@
       currentPlanAmount = amount;
       document.getElementById("momo-title").textContent = (plan === "pro") ? "Souscription Formule PRO 👑" : "Souscription Formule PLUS 🚀";
       document.getElementById("momo-amount").textContent = amount.toLocaleString("fr-FR") + " FCFA / mois";
+      backToStep1();
       document.getElementById("modal-payment").classList.remove("hidden");
+    }
+
+    function switchPayMode(mode) {
+      currentPayMode = mode;
+      var tabMomo = document.getElementById("tab-mode-momo");
+      var tabCard = document.getElementById("tab-mode-card");
+      var viewMomo = document.getElementById("view-pay-momo");
+      var viewCard = document.getElementById("view-pay-card");
+
+      if (mode === "momo") {
+        tabMomo.classList.add("active");
+        tabCard.classList.remove("active");
+        viewMomo.classList.remove("hidden");
+        viewCard.classList.add("hidden");
+      } else {
+        tabCard.classList.add("active");
+        tabMomo.classList.remove("active");
+        viewCard.classList.remove("hidden");
+        viewMomo.classList.add("hidden");
+        currentSelectedOperator = "card";
+      }
     }
 
     function selectOperator(op) {
       currentSelectedOperator = op;
-      var ops = ["orange", "moov", "mtn", "wave", "card"];
+      var ops = ["orange", "moov", "mtn", "wave"];
       ops.forEach(function(k) {
         var el = document.getElementById("op-" + k);
         if (el) el.classList.remove("selected");
       });
 
-      var mapKey = { "orange_money": "orange", "moov_money": "moov", "mtn_momo": "mtn", "wave": "wave", "card": "card" };
-      document.getElementById("op-" + mapKey[op]).classList.add("selected");
+      var mapKey = { "orange_money": "orange", "moov_money": "moov", "mtn_momo": "mtn", "wave": "wave" };
+      if (mapKey[op]) document.getElementById("op-" + mapKey[op]).classList.add("selected");
 
       var box = document.getElementById("momo-instructions-box");
-      if (op === "orange_money") box.innerHTML = "💡 <strong>Instructions :</strong> Composez le <strong>#144*4*6#</strong> sur votre téléphone ou validez la notification push Orange Money.";
-      else if (op === "moov_money") box.innerHTML = "💡 <strong>Instructions :</strong> Composez le <strong>*155*4#</strong> sur votre téléphone ou confirmez par message Moov Money.";
-      else if (op === "mtn_momo") box.innerHTML = "💡 <strong>Instructions :</strong> Validez l'autorisation sur votre app <strong>MTN MoMo</strong> ou tapez <strong>*133#</strong>.";
-      else if (op === "wave") box.innerHTML = "💡 <strong>Instructions :</strong> Ouvrez votre application <strong>Wave</strong> pour confirmer le débit instantané.";
-      else box.innerHTML = "💡 <strong>Instructions :</strong> Redirection vers le serveur de paiement sécurisé Visa / Mastercard.";
+      if (op === "orange_money") box.innerHTML = "💡 <strong>Procédure :</strong> Après validation, composez le <strong>#144*4*6#</strong> sur votre téléphone pour générer votre code OTP.";
+      else if (op === "moov_money") box.innerHTML = "💡 <strong>Procédure :</strong> Après validation, composez le <strong>*155*4#</strong> pour obtenir votre code de sécurité temporaire Moov.";
+      else if (op === "mtn_momo") box.innerHTML = "💡 <strong>Procédure :</strong> Validez la demande sur votre application <strong>MTN MoMo</strong> ou composez <strong>*133#</strong>.";
+      else if (op === "wave") box.innerHTML = "💡 <strong>Procédure :</strong> Ouvrez votre application <strong>Wave</strong> pour valider le débit instantané.";
     }
 
-    function executeMobileMoneyPayment() {
-      var phone = document.getElementById("momo-phone").value;
-      var btn = document.getElementById("btn-momo-pay");
+    function formatCardNumber(input) {
+      var v = input.value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+      var matches = v.match(/\d{4,16}/g);
+      var match = (matches && matches[0]) || "";
+      var parts = [];
+      for (var i = 0, len = match.length; i < len; i += 4) {
+        parts.push(match.substring(i, i + 4));
+      }
+      if (parts.length) {
+        input.value = parts.join(" ");
+      } else {
+        input.value = v;
+      }
+    }
+
+    // Étape 1 : Envoi des coordonnées et initiation
+    function initiatePaymentStep() {
+      var btn = document.getElementById("btn-momo-init");
       btn.disabled = true;
-      btn.textContent = "Initiation du paiement Mobile Money...";
+      btn.textContent = "Vérification des coordonnées sécurisées...";
 
       var payload = {
         plan: currentSelectedPlan,
-        operator: currentSelectedOperator,
-        phone_number: phone,
+        operator: currentPayMode === "card" ? "card" : currentSelectedOperator,
         customer_email: userEmail || "client@forensic.org",
         billing_cycle: "monthly"
       };
+
+      if (currentPayMode === "card") {
+        var cardHolder = document.getElementById("card-holder").value;
+        var cardNum = document.getElementById("card-number").value;
+        var cardExp = document.getElementById("card-expiry").value;
+        var cardCvv = document.getElementById("card-cvv").value;
+
+        if (!cardHolder || !cardNum || !cardExp || !cardCvv) {
+          alert("Veuillez renseigner toutes les informations de votre carte bancaire (Nom, Numéro, Date d'expiration, CVV).");
+          btn.disabled = false;
+          btn.textContent = "Valider et Débiter le Montant";
+          return;
+        }
+
+        payload.card_holder_name = cardHolder;
+        payload.card_number = cardNum;
+        payload.card_expiry = cardExp;
+        payload.card_cvv = cardCvv;
+      } else {
+        var phone = document.getElementById("momo-phone").value;
+        if (!phone || phone.trim().length < 8) {
+          alert("Veuillez saisir votre numéro de téléphone Mobile Money valide.");
+          btn.disabled = false;
+          btn.textContent = "Valider et Débiter le Montant";
+          return;
+        }
+        payload.phone_number = phone;
+      }
 
       var headers = { "Content-Type": "application/json" };
       if (userToken) headers["Authorization"] = "Bearer " + userToken;
@@ -718,32 +858,70 @@
         body: JSON.stringify(payload)
       })
       .then(function(res) {
-        if (!res.ok) throw new Error("Erreur d'initiation du paiement");
+        if (!res.ok) {
+          return res.json().then(function(d) { throw new Error(d.detail || "Erreur de paiement"); });
+        }
         return res.json();
       })
       .then(function(data) {
-        btn.textContent = "Confirmation du débit sur votre téléphone...";
-        
-        // Auto-confirm payment transaction
-        setTimeout(function() {
-          fetch("/api/v1/payments/confirm/" + data.transaction_ref, { method: "POST", headers: headers })
-            .then(function(r) { return r.json(); })
-            .then(function(resConfirm) {
-              userPlan = currentSelectedPlan;
-              localStorage.setItem("forensic_user_plan", currentSelectedPlan);
-              updateQuotaDisplay();
-              closeModal("modal-payment");
-              btn.disabled = false;
-              btn.textContent = "Payer maintenant";
-              alert("🎉 " + resConfirm.message_fr);
-              showScreen("screen-upload");
-            });
-        }, 1000);
+        currentPendingTxRef = data.transaction_ref;
+        document.getElementById("step2-tx-ref").textContent = data.transaction_ref;
+        document.getElementById("step2-instructions").textContent = (currentPayMode === "card") ? "Authentification 3D-Secure Bancaire" : "Autorisation Mobile Money (" + data.operator.toUpperCase() + ")";
+        document.getElementById("step2-sub-instructions").textContent = data.instructions_fr;
+
+        // Passer à l'Étape 2
+        document.getElementById("pay-step-1").classList.add("hidden");
+        document.getElementById("pay-step-2").classList.remove("hidden");
       })
       .catch(function(err) {
         alert(err.message);
+      })
+      .finally(function() {
         btn.disabled = false;
-        btn.textContent = "Payer maintenant";
+        btn.textContent = "Valider et Débiter le Montant";
+      });
+    }
+
+    // Étape 2 : Validation du code OTP / 3D-Secure
+    function confirmOtpPaymentStep() {
+      var otpCode = document.getElementById("otp-input").value;
+      if (!otpCode || otpCode.trim().length < 4) {
+        alert("Veuillez saisir le code OTP / 3D-Secure (4 à 6 chiffres) pour autoriser le prélèvement.");
+        return;
+      }
+
+      var btn = document.getElementById("btn-momo-confirm");
+      btn.disabled = true;
+      btn.textContent = "Vérification du code et débit en cours...";
+
+      var headers = { "Content-Type": "application/json" };
+      if (userToken) headers["Authorization"] = "Bearer " + userToken;
+
+      fetch("/api/v1/payments/confirm/" + currentPendingTxRef, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ otp_code: otpCode.trim() })
+      })
+      .then(function(res) {
+        if (!res.ok) {
+          return res.json().then(function(d) { throw new Error(d.detail || "Code d'autorisation invalide."); });
+        }
+        return res.json();
+      })
+      .then(function(data) {
+        userPlan = currentSelectedPlan;
+        localStorage.setItem("forensic_user_plan", currentSelectedPlan);
+        updateQuotaDisplay();
+        closeModal("modal-payment");
+        alert("🎉 " + data.message_fr);
+        showScreen("screen-upload");
+      })
+      .catch(function(err) {
+        alert(err.message);
+      })
+      .finally(function() {
+        btn.disabled = false;
+        btn.textContent = "Confirmer et Activer l'Abonnement";
       });
     }
 

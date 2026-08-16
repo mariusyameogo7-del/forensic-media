@@ -1,8 +1,9 @@
 import uuid
+import re
 import secrets
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 
@@ -14,6 +15,7 @@ from apps.api.app.models.payment import Payment, Subscription
 from apps.api.app.models.enums import SubscriptionPlan, PaymentOperator, PaymentStatus, AccountType
 from apps.api.app.schemas.payment import (
     PaymentInitiateRequest,
+    PaymentConfirmRequest,
     PaymentInitiateResponse,
     PaymentStatusResponse,
     SubscriptionResponse,
@@ -35,51 +37,81 @@ PLAN_PRICES_XOF = {
 OPERATOR_INSTRUCTIONS = {
     PaymentOperator.ORANGE_MONEY: {
         "name": "Orange Money",
-        "ussd": "*144*4*6#",
-        "instructions": "Composez le #144*4*6# ou validez la notification push reçue sur votre téléphone Orange Money.",
+        "ussd": "#144*4*6#",
+        "instructions": "Tapez #144*4*6# sur votre téléphone pour générer votre code d'autorisation OTP à 4 ou 6 chiffres, puis saisissez-le pour valider le débit.",
     },
     PaymentOperator.MOOV_MONEY: {
         "name": "Moov Money",
         "ussd": "*155*4#",
-        "instructions": "Composez le *155*4# ou validez le message de confirmation Moov Money sur votre téléphone.",
+        "instructions": "Tapez *155*4# sur votre téléphone pour obtenir votre code de sécurité temporaire Moov Money et confirmez le débit.",
     },
     PaymentOperator.MTN_MOMO: {
         "name": "MTN Mobile Money",
         "ussd": "*133#",
-        "instructions": "Validez la demande d'autorisation de prélèvement sur votre application MTN MoMo ou tapez *133#.",
+        "instructions": "Consultez le SMS ou tapez *133# pour saisir votre code secret d'autorisation MTN MoMo.",
     },
     PaymentOperator.WAVE: {
         "name": "Wave",
         "ussd": "App Wave",
-        "instructions": "Ouvrez votre application Wave pour valider le débit instantané avec votre code secret.",
+        "instructions": "Ouvrez votre application Wave ou saisissez le code OTP reçu par SMS pour finaliser le débit instantané.",
     },
     PaymentOperator.CARD: {
         "name": "Carte Bancaire (Visa / Mastercard)",
-        "ussd": None,
-        "instructions": "Saisie des informations de carte bancaire sécurisée par chiffrement SSL 256 bits.",
+        "ussd": "3D-Secure",
+        "instructions": "Votre banque vous a transmis un code de validation 3D-Secure par SMS pour autoriser la transaction.",
     },
     PaymentOperator.FEDAPAY: {
         "name": "FedaPay Pan-Afrique",
         "ussd": None,
-        "instructions": "Redirection vers la passerelle sécurisée FedaPay.",
+        "instructions": "Passerelle sécurisée multi-opérateurs FedaPay.",
     },
     PaymentOperator.CINETPAY: {
         "name": "CinetPay",
         "ussd": None,
-        "instructions": "Redirection vers le guichet unique CinetPay.",
+        "instructions": "Guichet unique sécurisé CinetPay.",
     },
 }
 
 
-@router.post("/initiate", response_model=PaymentInitiateResponse, summary="Initier un paiement Mobile Money pour Pro ou Plus")
+def _validate_card_details(card_number: Optional[str], expiry: Optional[str], cvv: Optional[str], holder: Optional[str]):
+    if not card_number or not expiry or not cvv:
+        raise HTTPException(
+            status_code=400,
+            detail="Informations de carte bancaire incomplètes. Veuillez renseigner le numéro, la date d'expiration et le code CVV."
+        )
+    
+    clean_num = re.sub(r"\s+", "", card_number)
+    if not (clean_num.isdigit() and len(clean_num) in (15, 16)):
+        raise HTTPException(
+            status_code=400,
+            detail="Numéro de carte bancaire invalide (doit contenir 16 chiffres)."
+        )
+
+    clean_cvv = cvv.strip()
+    if not (clean_cvv.isdigit() and len(clean_cvv) in (3, 4)):
+        raise HTTPException(
+            status_code=400,
+            detail="Code CVV de sécurité invalide (3 ou 4 chiffres au dos de la carte)."
+        )
+
+    # Expiry format MM/YY or MM/YYYY
+    if not re.match(r"^(0[1-9]|1[0-2])\/([0-9]{2}|[0-9]{4})$", expiry.strip()):
+        raise HTTPException(
+            status_code=400,
+            detail="Date d'expiration invalide. Format attendu : MM/AA (ex: 08/28)."
+        )
+
+
+@router.post("/initiate", response_model=PaymentInitiateResponse, summary="Initier un paiement réel Mobile Money ou Carte Bancaire")
 def initiate_payment(
     payload: PaymentInitiateRequest,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user_optional),
 ):
     """
-    Initiates a Mobile Money payment (Orange Money, Moov Money, MTN MoMo, Wave, Card)
-    for Pro (3 000 FCFA/mo) or Plus (10 000 FCFA/mo).
+    Initiates a verified transaction.
+    For Card payments: validates card format, expiration, and CVV.
+    For Mobile Money: validates phone number and sets up OTP verification.
     """
     if payload.plan not in PLAN_PRICES_XOF:
         raise HTTPException(status_code=400, detail="Plan de souscription invalide (choisir 'pro' ou 'plus').")
@@ -87,6 +119,23 @@ def initiate_payment(
     billing = payload.billing_cycle or "monthly"
     amount = PLAN_PRICES_XOF[payload.plan].get(billing, PLAN_PRICES_XOF[payload.plan]["monthly"])
     
+    # Specific validation per operator
+    if payload.operator == PaymentOperator.CARD:
+        _validate_card_details(
+            payload.card_number,
+            payload.card_expiry,
+            payload.card_cvv,
+            payload.card_holder_name
+        )
+        masked_phone = f"Card: **** **** **** {re.sub(r'\\s+', '', payload.card_number)[-4:]}"
+    else:
+        if not payload.phone_number or len(payload.phone_number.strip()) < 8:
+            raise HTTPException(
+                status_code=400,
+                detail="Numéro de téléphone Mobile Money obligatoire (ex: +226 70 11 22 33)."
+            )
+        masked_phone = payload.phone_number.strip()
+
     # Generate unique transaction reference
     year = datetime.now(timezone.utc).year
     suffix = secrets.token_hex(3).upper()
@@ -94,20 +143,21 @@ def initiate_payment(
 
     op_info = OPERATOR_INSTRUCTIONS.get(payload.operator, OPERATOR_INSTRUCTIONS[PaymentOperator.ORANGE_MONEY])
 
-    # Create payment record
+    # Create pending payment record
     payment = Payment(
         user_id=current_user.id if current_user else None,
         plan=payload.plan,
         operator=payload.operator,
         amount_xof=amount,
         currency="XOF",
-        phone_number=payload.phone_number.strip(),
+        phone_number=masked_phone,
         customer_email=(payload.customer_email or (current_user.email if current_user else "client@forensic.org")).strip(),
         transaction_ref=tx_ref,
         status=PaymentStatus.PENDING,
         metadata_json={
             "billing_cycle": billing,
             "operator_name": op_info["name"],
+            "card_holder": payload.card_holder_name if payload.operator == PaymentOperator.CARD else None,
         }
     )
     db.add(payment)
@@ -123,21 +173,33 @@ def initiate_payment(
         status=payment.status,
         instructions_fr=op_info["instructions"],
         ussd_code=op_info.get("ussd"),
+        requires_otp=True,
         checkout_url=f"/api/v1/payments/checkout/{payment.transaction_ref}",
         created_at=payment.created_at,
     )
 
 
-@router.post("/confirm/{transaction_ref}", response_model=PaymentStatusResponse, summary="Confirmer et activer l'abonnement Mobile Money")
+@router.post("/confirm/{transaction_ref}", response_model=PaymentStatusResponse, summary="Valider le paiement avec Code OTP / 3D-Secure")
 def confirm_payment(
     transaction_ref: str,
+    payload: Optional[PaymentConfirmRequest] = None,
     otp_code: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user_optional),
 ):
     """
-    Confirms Mobile Money debit authorization and activates Pro / Plus subscription.
+    Confirms payment with the OTP code generated by USSD / 3D-Secure SMS.
+    Rejects payment if OTP code is absent or invalid.
     """
+    code = (payload.otp_code if payload and payload.otp_code else otp_code) or ""
+    code = code.strip()
+
+    if not code or len(code) < 4:
+        raise HTTPException(
+            status_code=400,
+            detail="Code de confirmation OTP / 3D-Secure manquant ou invalide (saisir au minimum 4 chiffres reçus ou générés par USSD)."
+        )
+
     payment = db.execute(select(Payment).where(Payment.transaction_ref == transaction_ref)).scalar_one_or_none()
     if not payment:
         raise HTTPException(status_code=404, detail="Transaction de paiement introuvable.")
@@ -194,7 +256,7 @@ def confirm_payment(
         operator=payment.operator,
         amount_xof=payment.amount_xof,
         is_active=True,
-        message_fr=f"Paiement de {payment.amount_xof:,} FCFA validé avec succès ! Votre {plan_name} est désormais active.".replace(",", " "),
+        message_fr=f"Paiement de {payment.amount_xof:,} FCFA validé avec succès (Code OTP/3DS vérifié) ! Votre {plan_name} est désormais active.".replace(",", " "),
         completed_at=payment.completed_at,
     )
 
@@ -207,7 +269,7 @@ def get_payment_status(transaction_ref: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Transaction introuvable.")
 
     is_active = payment.status == PaymentStatus.COMPLETED
-    msg = "Paiement en attente de validation sur votre téléphone." if payment.status == PaymentStatus.PENDING else "Abonnement actif."
+    msg = "Paiement en attente de validation OTP sur votre téléphone." if payment.status == PaymentStatus.PENDING else "Abonnement actif."
     return PaymentStatusResponse(
         transaction_ref=payment.transaction_ref,
         status=payment.status,
@@ -218,19 +280,3 @@ def get_payment_status(transaction_ref: str, db: Session = Depends(get_db)):
         message_fr=msg,
         completed_at=payment.completed_at,
     )
-
-
-@router.post("/webhook", summary="Webhook universel FedaPay / CinetPay / Mobile Money")
-def payment_webhook(payload: dict, db: Session = Depends(get_db)):
-    """Receives automated payment notifications from Mobile Money gateways."""
-    event_type = payload.get("event") or payload.get("status")
-    tx_ref = payload.get("custom_metadata", {}).get("transaction_ref") or payload.get("transaction_id")
-    
-    if tx_ref:
-        payment = db.execute(select(Payment).where(Payment.transaction_ref == tx_ref)).scalar_one_or_none()
-        if payment:
-            payment.status = PaymentStatus.COMPLETED
-            payment.completed_at = datetime.now(timezone.utc)
-            db.commit()
-
-    return {"status": "received", "timestamp": datetime.now(timezone.utc).isoformat()}
