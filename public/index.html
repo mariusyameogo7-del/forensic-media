@@ -104,6 +104,12 @@
     .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.75); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
     .modal-box { background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); position: relative; max-height: 90vh; overflow-y: auto; }
     
+    .btn-close-modal { background: #f1f5f9; border: 1px solid #cbd5e1; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #475569; cursor: pointer; transition: all 0.2s; }
+    .btn-close-modal:hover { background: #fee2e2; border-color: #fca5a5; color: #ef4444; transform: scale(1.08); }
+    
+    .btn-cancel-pay { width: 100%; background: none; border: 1px solid #e2e8f0; color: #64748b; padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: all 0.15s; }
+    .btn-cancel-pay:hover { background: #f8fafc; color: #0f172a; border-color: #cbd5e1; }
+    
     .pay-methods-tabs { display: flex; gap: 8px; margin: 16px 0 12px 0; }
     .pay-method-tab { flex: 1; border: 2px solid #e2e8f0; border-radius: 10px; padding: 10px; font-weight: 700; font-size: 13px; text-align: center; cursor: pointer; background: #f8fafc; color: #64748b; }
     .pay-method-tab.active { border-color: #0284c7; background: #f0f9ff; color: #0369a1; }
@@ -220,7 +226,7 @@
     <section id="screen-progress" class="hidden">
       <div class="card progress-box">
         <div class="pill">⏳ Analyse criminalistique en cours...</div>
-        <h2 style="font-size:22px; font-weight:800; margin: 10px 0;">Examen multi-dimensionnel</h2>
+        <h2 style="font-size:22px; font-weight:800; margin- apprehension: 10px 0;">Examen multi-dimensionnel</h2>
         <div style="font-size:13px; color:#64748b;">Référence : <span id="progress-public-id" style="font-family:monospace; font-weight:700; color:#0f172a;">AN-...</span></div>
         
         <div class="progress-bar-bg">
@@ -484,11 +490,11 @@
   </main>
 
   <!-- MODAL DE PAIEMENT SÉCURISÉ (MOBILE MONEY & CARTE BANCAIRE) -->
-  <div id="modal-payment" class="modal-overlay hidden">
+  <div id="modal-payment" class="modal-overlay hidden" onclick="handleOverlayClick(event, 'modal-payment')">
     <div class="modal-box">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span id="momo-plan-badge" class="pill" style="margin:0;">Passerelle de Paiement Sécurisée</span>
-        <button style="background:none; border:none; font-size:18px; font-weight:700; cursor:pointer;" onclick="closeModal('modal-payment')">✕</button>
+        <button class="btn-close-modal" title="Fermer la fenêtre de paiement (Échap)" onclick="closeModal('modal-payment')">✕</button>
       </div>
 
       <!-- VUE ÉTAPE 1 : SAISIE DES INFORMATIONS DE PAIEMENT -->
@@ -556,6 +562,9 @@
         </div>
 
         <button type="button" id="btn-momo-init" class="btn-submit" style="background:#0284c7; margin-top:16px;" onclick="initiatePaymentStep()">Valider et Débiter le Montant</button>
+        
+        <!-- BOUTON DÉSISTEMENT / ANNULATION ÉTAPE 1 -->
+        <button type="button" class="btn-cancel-pay" onclick="closeModal('modal-payment')">✕ Annuler et retourner aux offres</button>
       </div>
 
       <!-- VUE ÉTAPE 2 : VALIDATION RÉELLE AVEC CODE OTP / 3D-SECURE -->
@@ -583,7 +592,10 @@
 
         <button type="button" id="btn-momo-confirm" class="btn-submit" style="background:#16a34a; margin-top:16px;" onclick="confirmOtpPaymentStep()">Confirmer et Activer l'Abonnement</button>
         
-        <button type="button" class="btn-sample" style="width:100%; margin-top:8px;" onclick="backToStep1()">← Modifier mes informations</button>
+        <button type="button" class="btn-sample" style="width:100%; margin-top:8px;" onclick="backToStep1()">← Modifier mes coordonnées</button>
+        
+        <!-- BOUTON DÉSISTEMENT / ANNULATION ÉTAPE 2 -->
+        <button type="button" class="btn-cancel-pay" onclick="closeModal('modal-payment')">✕ Abandonner le paiement</button>
       </div>
 
       <div style="text-align:center; font-size:11px; color:#94a3b8; margin-top:12px;">🔒 Transaction certifiée par la passerelle FedaPay / CinetPay Pan-Afrique</div>
@@ -754,9 +766,23 @@
     }
 
     function closeModal(id) {
-      document.getElementById(id).classList.add("hidden");
+      var el = document.getElementById(id);
+      if (el) el.classList.add("hidden");
       backToStep1();
     }
+
+    function handleOverlayClick(event, modalId) {
+      if (event.target.id === modalId) {
+        closeModal(modalId);
+      }
+    }
+
+    // Close on Escape key press
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Escape") {
+        closeModal("modal-payment");
+      }
+    });
 
     function backToStep1() {
       document.getElementById("pay-step-1").classList.remove("hidden");
