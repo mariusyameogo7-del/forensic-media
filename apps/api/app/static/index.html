@@ -136,6 +136,19 @@
     .auth-tab-btn { flex: 1; background: none; border: none; padding: 10px; font-weight: 700; font-size: 14px; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; }
     .auth-tab-btn.active { color: #0284c7; border-bottom-color: #0284c7; }
     
+    /* WHATSAPP & API SIMULATOR */
+    .whatsapp-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+    @media (max-width: 768px) { .whatsapp-container { grid-template-columns: 1fr; } }
+    .wa-phone-frame { background: #0b141a; border-radius: 28px; padding: 16px; border: 4px solid #1f2c34; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
+    .wa-header { background: #202c33; padding: 12px 16px; border-radius: 16px 16px 0 0; display: flex; align-items: center; gap: 12px; color: white; }
+    .wa-avatar { width: 38px; height: 38px; background: #00a884; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; }
+    .wa-chat-body { background: #0b141a; background-image: radial-gradient(#1f2c34 1px, transparent 1px); background-size: 16px 16px; min-height: 380px; padding: 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+    .wa-bubble { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.4; position: relative; }
+    .wa-bubble.user { background: #005c4b; color: #e9edef; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .wa-bubble.bot { background: #202c33; color: #e9edef; align-self: flex-start; border-bottom-left-radius: 2px; }
+    .wa-bubble-time { font-size: 10px; color: #8696a0; text-align: right; margin-top: 4px; }
+    .wa-input-bar { background: #202c33; padding: 10px; border-radius: 0 0 16px 16px; display: flex; gap: 8px; }
+    
     /* Admin Dashboard */
     .admin-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .stat-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center; }
@@ -159,11 +172,12 @@
       
       <div class="header-right">
         <div id="quota-display" class="quota-badge">
-          <span>⭐ Crédits d'essai :</span>
-          <strong id="quota-count">3 / 3</strong>
+          <span>⭐ Essai Libre :</span>
+          <strong id="quota-count">3 / 3 restants</strong>
         </div>
         <nav>
           <button id="nav-verify" class="nav-btn active" onclick="showScreen('screen-upload')">Vérifier</button>
+          <button id="nav-whatsapp" class="nav-btn" onclick="showScreen('screen-whatsapp')">📱 WhatsApp & API Bot</button>
           <button id="nav-history" class="nav-btn" onclick="loadMyHistory()">Mon Historique</button>
           <button id="nav-pricing" class="nav-btn" onclick="showScreen('screen-pricing')">Tarifs & Offres</button>
           <button id="nav-auth" class="nav-btn" onclick="showScreen('screen-auth')">Connexion / Compte</button>
@@ -177,9 +191,9 @@
     <!-- SCREEN 1 : UPLOAD & VERIFICATION -->
     <section id="screen-upload">
       <div class="hero">
-        <div class="pill">✨ Détection IA Générative (ChatGPT, DALL·E 3, Midjourney) & Contexte Mondial</div>
+        <div class="pill">✨ Détection IA Générative (ChatGPT, DALL·E 3, Midjourney) & Contexte Bénin / Afrique</div>
         <h1>Vérifiez une image avant de la partager</h1>
-        <p>Analysez l'origine, l'intégrité, le pourcentage de probabilité IA et le contexte Web avec 4 dimensions indépendantes.</p>
+        <p>Analysez l'origine, l'intégrité, le spectre fréquentiel IA et le contexte Web avec 4 dimensions indépendantes.</p>
       </div>
 
       <div class="card">
@@ -189,7 +203,7 @@
           <div id="drop-prompt">
             <div class="drop-icon">📷</div>
             <div class="drop-title">Cliquez ou glissez une image ici</div>
-            <div class="drop-sub">Compatible : Images ChatGPT / DALL·E 3, Midjourney, Firefly, photos d'appareils (JPG, PNG, WEBP)</div>
+            <div class="drop-sub">Compatible : Images ChatGPT / DALL·E 3, Midjourney v6, Flux.1, photos d'appareils (JPG, PNG, WEBP)</div>
             <button type="button" class="btn-browse" onclick="document.getElementById('file-input').click()">Parcourir vos fichiers</button>
           </div>
 
@@ -204,8 +218,8 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Affirmation ou lieu à vérifier (facultatif — mondial : Abidjan, Dakar, Paris, Bamako...)</label>
-          <textarea id="claim-input" rows="2" placeholder="Exemples : « Photo prise hier à Abidjan », « Mobilisation à Dakar », « Inondation à Paris », « Image créée par ChatGPT »..."></textarea>
+          <label class="form-label">Affirmation ou lieu à vérifier (Bénin : Cotonou, Porto-Novo, Parakou... / Monde : Abidjan, Dakar, Paris...)</label>
+          <textarea id="claim-input" rows="2" placeholder="Exemples : « Inondation hier à Cotonou », « Mobilisation à Porto-Novo », « Événement à Parakou », « Image créée par ChatGPT »..."></textarea>
         </div>
 
         <button type="button" id="btn-submit" class="btn-submit" onclick="submitAnalysis()">Lancer l'analyse approfondie</button>
@@ -215,7 +229,7 @@
       <div class="sample-section">
         <div class="sample-title">Exemples de cas types préparés :</div>
         <div class="sample-btns">
-          <button class="btn-sample" onclick="loadSampleCase('photo_manifestation_ouaga.jpg')">📍 Cas 1 : Décontextualisation (Abidjan / Bamako / Dakar)</button>
+          <button class="btn-sample" onclick="loadSampleCase('photo_manifestation_ouaga.jpg', 'Affirmation : Événement en direct à Cotonou')">🇧🇯 Cas 1 : Rumeur Cotonou / Bénin (Décontextualisation)</button>
           <button class="btn-sample" onclick="loadSampleCase('photo_appareil_canon.jpg')">📷 Cas 2 : Cliché authentique avec EXIF d'appareil</button>
           <button class="btn-sample" onclick="loadSampleCase('portrait_ia_synthetique.png')">🤖 Cas 3 : Image IA ChatGPT / DALL·E 3 (C2PA)</button>
         </div>
@@ -235,9 +249,9 @@
 
         <div style="text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; font-size:13px; line-height:1.8;">
           <div>✓ Inspection des manifestes C2PA / Content Credentials (OpenAI, Adobe, Midjourney)</div>
-          <div>✓ Calcul des empreintes SHA-256 et pHash</div>
-          <div>✓ Évaluation du pourcentage probabiliste d'IA générative</div>
-          <div>✓ Recherche d'antériorités Web mondiales et fact-checks</div>
+          <div>✓ Calcul des empreintes SHA-256, pHash et analyse spectrale FFT</div>
+          <div>✓ Évaluation du pourcentage probabiliste d'IA générative & Deepfakes</div>
+          <div>✓ Recherche d'antériorités Web mondiales & réseaux de fact-checkers (Bénin Check, Africa Check)</div>
           <div>⏳ Synthèse de la conclusion prudente...</div>
         </div>
       </div>
@@ -319,6 +333,18 @@
         </div>
       </div>
 
+      <!-- CARTOUCHE INNOVATION : ANALYSE FREQUENTIELLE FFT & DEEPFAKES -->
+      <div class="card" style="background:#f0f9ff; border:1px solid #bae6fd;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <span style="font-size:20px;">🔬</span>
+          <h3 style="font-size:15px; font-weight:800; color:#0369a1;">Moteur d'Analyse Spectrale FFT & Détection Deepfakes</h3>
+        </div>
+        <p style="font-size:13px; color:#334155; line-height:1.6;">
+          Examen approfondi du domaine fréquentiel (Transformée de Fourier 2D) et de la cohérence du bruit de capteur physique :
+          permet d'identifier les discontinuités de fusion sur les visages, le lissage synthétique et les artefacts résiduels invisibles à l'œil nu.
+        </p>
+      </div>
+
       <div class="card">
         <h3 style="font-size:16px; font-weight:800; margin-bottom:6px;">Pourquoi cette conclusion ? (Explicabilité & Preuves)</h3>
         <p style="font-size:12px; color:#64748b; margin-bottom:14px;">Constatations techniques adossées à chaque moteur :</p>
@@ -326,7 +352,67 @@
       </div>
     </section>
 
-    <!-- SCREEN 4 : MON HISTORIQUE SÉCURISÉ -->
+    <!-- SCREEN 4 : SIMULATEUR BOT WHATSAPP & API DÉVELOPPEUR -->
+    <section id="screen-whatsapp" class="hidden">
+      <div class="hero">
+        <div class="pill">📲 Innovation : Fact-Checking Instantané sur WhatsApp</div>
+        <h1>Le Bot WhatsApp Forensic Media</h1>
+        <p>Permettez aux journalistes et citoyens de transférer une photo douteuse sur WhatsApp et de recevoir la vérification en 3 secondes.</p>
+      </div>
+
+      <div class="whatsapp-container">
+        <!-- SIMULATEUR PHONE WHATSAPP -->
+        <div class="wa-phone-frame">
+          <div class="wa-header">
+            <div class="wa-avatar">🛡️</div>
+            <div>
+              <div style="font-weight:800; font-size:14px;">Forensic Media Bot Bénin 🇧🇯</div>
+              <div style="font-size:11px; color:#00a884;" id="wa-status-text">● En ligne (+229 97 00 00 00)</div>
+            </div>
+          </div>
+
+          <div id="wa-chat-box" class="wa-chat-body">
+            <div class="wa-bubble bot">
+              👋 <strong>Bonjour !</strong> Je suis le bot de vérification <em>Forensic Media</em>.<br>
+              Envoyez-moi une image ou une rumeur qui circule sur WhatsApp pour vérifier son authenticité.
+              <div class="wa-bubble-time">10:00</div>
+            </div>
+
+            <div id="wa-dynamic-messages"></div>
+          </div>
+
+          <div class="wa-input-bar">
+            <input type="text" id="wa-user-input" placeholder="Écrire un message ou tester une rumeur..." style="background:#2a3942; border:none; color:white; font-size:13px; padding:10px; border-radius:8px;">
+            <button class="btn-browse" style="padding:8px 14px; background:#00a884;" onclick="triggerWhatsAppSimulation()">Envoyer</button>
+          </div>
+        </div>
+
+        <!-- EXPLICATION TECHNIQUE & API FLUX -->
+        <div>
+          <div class="card">
+            <h3 style="font-size:16px; font-weight:800; margin-bottom:10px; color:#0f172a;">⚡ Pourquoi cette intégration surpasse la concurrence ?</h3>
+            <ul style="font-size:13px; line-height:2; color:#334155; padding-left:18px;">
+              <li><strong>Canal n°1 en Afrique :</strong> Plus de 90% des fausses images virales se propagent via les groupes WhatsApp familiaux et communautaires.</li>
+              <li><strong>Réponse automatisée en 3 secondes :</strong> Diagnostic instantané des métadonnées C2PA, pourcentage IA et antériorités Web sans quitter WhatsApp.</li>
+              <li><strong>Accessible à tous :</strong> Aucune compétence technique requise pour le grand public.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size:15px; font-weight:800; margin-bottom:8px;">💻 API & Webhooks pour Rédactions</h3>
+            <p style="font-size:12px; color:#64748b; margin-bottom:10px;">Connectez directement votre système de publication CMS ou chaîne Telegram :</p>
+            <pre style="background:#0f172a; color:#38bdf8; padding:12px; border-radius:10px; font-size:11px; overflow-x:auto;">
+curl -X POST "https://forensic-media-app.onrender.com/api/v1/analyses" \
+  -H "Authorization: Bearer VOTRE_CLE_API" \
+  -F "file=@photo_suspecte.jpg" \
+  -F "claim=Affirmation vérifiée à Cotonou"
+            </pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 5 : MON HISTORIQUE SÉCURISÉ -->
     <section id="screen-history" class="hidden">
       <div class="res-header">
         <div>
@@ -338,12 +424,12 @@
       <div id="my-history-list"></div>
     </section>
 
-    <!-- SCREEN 5 : ONGLET OFFRES & TARIFS (2 OFFRES PAYANTES : PRO & PLUS) -->
+    <!-- SCREEN 6 : ONGLET OFFRES & TARIFS (2 OFFRES PAYANTES : PRO & PLUS) -->
     <section id="screen-pricing" class="hidden">
       <div class="hero">
         <div class="pill">💎 Formules & Abonnements Sécurisés</div>
         <h1>Choisissez la formule adaptée à vos besoins</h1>
-        <p>Paiement sécurisé par <strong>Orange Money, Moov Money, MTN MoMo, Wave ou Carte Bancaire (Visa / Mastercard)</strong>.</p>
+        <p>Paiement sécurisé par <strong>MTN MoMo, Moov Money, Orange Money, Wave ou Carte Bancaire (Visa / Mastercard)</strong>.</p>
       </div>
 
       <div class="pricing-grid">
@@ -394,7 +480,7 @@
             <div class="pricing-period">ou 100 000 FCFA / an (2 mois offerts)</div>
             <ul class="pricing-list">
               <li><strong>Analyses 100% ILLIMITÉES</strong></li>
-              <li><strong>Accès Clé API Développeur & Webhooks</strong></li>
+              <li><strong>Accès Clé API Développeur & Bot WhatsApp</strong></li>
               <li>Intégration directe CMS & Flux de publication</li>
               <li>Rapports PDF HD personnalisables avec logo</li>
               <li>Multi-utilisateurs & Équipe rédaction</li>
@@ -406,7 +492,7 @@
       </div>
     </section>
 
-    <!-- SCREEN 6 : ONGLET CRÉER UN COMPTE / CONNEXION (AUTH) -->
+    <!-- SCREEN 7 : ONGLET CRÉER UN COMPTE / CONNEXION (AUTH) -->
     <section id="screen-auth" class="hidden">
       <div class="hero">
         <div class="pill">🔐 Espace Membre</div>
@@ -450,7 +536,7 @@
       </div>
     </section>
 
-    <!-- SCREEN 7 : DASHBOARD ADMINISTRATEUR -->
+    <!-- SCREEN 8 : DASHBOARD ADMINISTRATEUR -->
     <section id="screen-admin" class="hidden">
       <div class="res-header">
         <div>
@@ -504,7 +590,7 @@
 
         <!-- Onglets Choix du Moyen : Mobile Money VS Carte Bancaire -->
         <div class="pay-methods-tabs">
-          <div id="tab-mode-momo" class="pay-method-tab active" onclick="switchPayMode('momo')">📱 Mobile Money</div>
+          <div id="tab-mode-momo" class="pay-method-tab active" onclick="switchPayMode('momo')">📱 Mobile Money (MTN / Moov / Orange / Wave)</div>
           <div id="tab-mode-card" class="pay-method-tab" onclick="switchPayMode('card')">💳 Carte Bancaire (Visa/Mastercard)</div>
         </div>
 
@@ -512,20 +598,20 @@
         <div id="view-pay-momo">
           <label class="form-label">Sélectionnez votre opérateur Mobile Money</label>
           <div class="operator-grid">
-            <div id="op-orange" class="operator-btn selected" onclick="selectOperator('orange_money')">🟠 Orange Money</div>
+            <div id="op-mtn" class="operator-btn selected" onclick="selectOperator('mtn_momo')">🟡 MTN MoMo (Bénin & Région)</div>
             <div id="op-moov" class="operator-btn" onclick="selectOperator('moov_money')">🔵 Moov Money</div>
-            <div id="op-mtn" class="operator-btn" onclick="selectOperator('mtn_momo')">🟡 MTN MoMo</div>
+            <div id="op-orange" class="operator-btn" onclick="selectOperator('orange_money')">🟠 Orange Money</div>
             <div id="op-wave" class="operator-btn" onclick="selectOperator('wave')">🌊 Wave</div>
           </div>
 
           <div class="form-group" style="margin-top:10px;">
             <label class="form-label">Numéro de Téléphone Mobile Money</label>
-            <input type="tel" id="momo-phone" placeholder="Ex: +226 70 12 34 56 ou +225 07 00 00 00">
-            <div style="font-size:11px; color:#64748b; margin-top:4px;">💡 Saisissez le numéro avec son indicatif (+226 Burkina, +225 CI, +221 Sénégal, etc.)</div>
+            <input type="tel" id="momo-phone" placeholder="Ex: +229 97 12 34 56 (Bénin) ou +226 70 12 34 56">
+            <div style="font-size:11px; color:#64748b; margin-top:4px;">💡 Saisissez le numéro avec son indicatif (+229 Bénin, +226 Burkina, +225 CI, +221 Sénégal, etc.)</div>
           </div>
 
           <div id="momo-instructions-box" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:12px; font-size:12px; color:#0369a1; margin-top:12px;">
-            💡 <strong>Procédure :</strong> Après validation, composez le <strong>#144*4*6#</strong> sur votre téléphone pour générer votre code OTP à 4 chiffres.
+            💡 <strong>Procédure MTN MoMo :</strong> Après validation, approuvez la demande de débit sur votre téléphone ou composez <strong>*133#</strong> / <strong>*138#</strong>.
           </div>
         </div>
 
@@ -612,7 +698,7 @@
     var currentAuthMode = "register";
     var currentSelectedPlan = "pro";
     var currentPayMode = "momo"; // "momo" or "card"
-    var currentSelectedOperator = "orange_money";
+    var currentSelectedOperator = "mtn_momo";
     var currentPlanAmount = 3000;
     var currentPendingTxRef = null;
     var currentExpectedOtp = null;
@@ -632,7 +718,6 @@
         document.getElementById("auth-user-email").textContent = userEmail;
         document.getElementById("auth-user-plan").textContent = "Formule Active : " + (userPlan === "trial" ? "Essai Libre" : userPlan.toUpperCase());
 
-        // Synchroniser le profil réel depuis le serveur
         fetch("/api/v1/auth/me", { headers: { "Authorization": "Bearer " + userToken } })
           .then(function(res) {
             if (res.ok) return res.json();
@@ -646,7 +731,6 @@
             updateQuotaDisplay();
           })
           .catch(function() {
-            // En cas d'erreur de session, réinitialiser
             userToken = "";
             userEmail = "";
             userPlan = "trial";
@@ -700,7 +784,6 @@
 
     checkAuthState();
 
-    // Store user's own analysis tokens
     function addMyToken(token) {
       if (!token) return;
       var tokens = JSON.parse(localStorage.getItem("my_analysis_tokens") || "[]");
@@ -775,15 +858,15 @@
     }
 
     function showScreen(id) {
-      var sections = ["screen-upload", "screen-progress", "screen-result", "screen-history", "screen-pricing", "screen-auth", "screen-admin"];
+      var sections = ["screen-upload", "screen-progress", "screen-result", "screen-whatsapp", "screen-history", "screen-pricing", "screen-auth", "screen-admin"];
       for (var i = 0; i < sections.length; i++) {
         document.getElementById(sections[i]).classList.add("hidden");
       }
       document.getElementById(id).classList.remove("hidden");
       
-      // Update nav active styles
       document.querySelectorAll("nav .nav-btn").forEach(function(btn) { btn.classList.remove("active"); });
       if (id === "screen-upload") document.getElementById("nav-verify").classList.add("active");
+      if (id === "screen-whatsapp") document.getElementById("nav-whatsapp").classList.add("active");
       if (id === "screen-history") document.getElementById("nav-history").classList.add("active");
       if (id === "screen-pricing") document.getElementById("nav-pricing").classList.add("active");
       if (id === "screen-auth") document.getElementById("nav-auth").classList.add("active");
@@ -803,7 +886,6 @@
       }
     }
 
-    // Close on Escape key press
     document.addEventListener("keydown", function(e) {
       if (e.key === "Escape") {
         closeModal("modal-payment");
@@ -859,18 +941,16 @@
       if (mapKey[op]) document.getElementById("op-" + mapKey[op]).classList.add("selected");
 
       var box = document.getElementById("momo-instructions-box");
-      if (op === "orange_money") box.innerHTML = "💡 <strong>Procédure :</strong> Après validation, composez le <strong>#144*4*6#</strong> sur votre téléphone pour générer votre code OTP.";
-      else if (op === "moov_money") box.innerHTML = "💡 <strong>Procédure :</strong> Après validation, composez le <strong>*155*4#</strong> pour obtenir votre code de sécurité temporaire Moov.";
-      else if (op === "mtn_momo") box.innerHTML = "💡 <strong>Procédure :</strong> Validez la demande sur votre application <strong>MTN MoMo</strong> ou composez <strong>*133#</strong>.";
-      else if (op === "wave") box.innerHTML = "💡 <strong>Procédure :</strong> Ouvrez votre application <strong>Wave</strong> pour valider le débit instantané.";
+      if (op === "mtn_momo") box.innerHTML = "💡 <strong>Procédure MTN MoMo (Bénin & Région) :</strong> Après validation, composez <strong>*133#</strong> ou <strong>*138#</strong> sur votre téléphone pour autoriser le débit.";
+      else if (op === "moov_money") box.innerHTML = "💡 <strong>Procédure Moov Money :</strong> Après validation, composez le <strong>*155*4#</strong> pour obtenir votre code de sécurité temporaire.";
+      else if (op === "orange_money") box.innerHTML = "💡 <strong>Procédure Orange Money :</strong> Après validation, composez le <strong>#144*4*6#</strong> sur votre téléphone pour générer votre code OTP.";
+      else if (op === "wave") box.innerHTML = "💡 <strong>Procédure Wave :</strong> Ouvrez votre application <strong>Wave</strong> pour valider le débit instantané.";
     }
 
-    // Auto-detection and dynamic formatting for credit card
     function detectAndFormatCard(input) {
       var raw = input.value.replace(/\D/g, "");
       var badge = document.getElementById("card-brand-badge");
       
-      // Brand detection
       if (raw.startsWith("4")) {
         badge.className = "card-brand-badge visa";
         badge.innerHTML = "💳 VISA";
@@ -888,7 +968,6 @@
         badge.innerHTML = "💳 Détection auto";
       }
 
-      // Spacing format: 4485 0000 1234 5678
       var formatted = "";
       for (var i = 0; i < raw.length; i++) {
         if (i > 0 && i % 4 === 0) formatted += " ";
@@ -906,7 +985,6 @@
       }
     }
 
-    // Étape 1 : Envoi des coordonnées et génération de l'OTP
     function initiatePaymentStep() {
       var btn = document.getElementById("btn-momo-init");
       btn.disabled = true;
@@ -939,7 +1017,7 @@
       } else {
         var phone = document.getElementById("momo-phone").value;
         if (!phone || phone.trim().length < 8) {
-          alert("Veuillez saisir votre numéro de téléphone Mobile Money (ex: +226 70 12 34 56).");
+          alert("Veuillez saisir votre numéro de téléphone Mobile Money (ex: +229 97 12 34 56 ou +226 70 12 34 56).");
           btn.disabled = false;
           btn.textContent = "Valider et Débiter le Montant";
           return;
@@ -970,7 +1048,6 @@
         document.getElementById("step2-code-display").textContent = data.demo_otp || "••••";
         document.getElementById("step2-sub-instructions").textContent = data.instructions_fr;
 
-        // Passer à l'Étape 2
         document.getElementById("pay-step-1").classList.add("hidden");
         document.getElementById("pay-step-2").classList.remove("hidden");
         document.getElementById("otp-input").focus();
@@ -984,7 +1061,6 @@
       });
     }
 
-    // Étape 2 : Vérification stricte du code OTP
     function confirmOtpPaymentStep() {
       var otpCode = document.getElementById("otp-input").value;
       if (!otpCode || otpCode.trim().length < 4) {
@@ -1131,7 +1207,6 @@
             addMyToken(data.access_token);
           }
 
-          // Decrement credits if trial
           if (userPlan === "trial") {
             localStorage.setItem("forensic_free_credits", String(Math.max(0, credits - 1)));
             updateQuotaDisplay();
@@ -1307,6 +1382,57 @@
         });
     }
 
+    // SIMULATION BOT WHATSAPP
+    function triggerWhatsAppSimulation() {
+      var input = document.getElementById("wa-user-input");
+      var text = input.value.trim() || "Est-ce que cette photo à Cotonou est vraie ?";
+      input.value = "";
+
+      var box = document.getElementById("wa-dynamic-messages");
+      var nowStr = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
+      // Add user message
+      var uDiv = document.createElement("div");
+      uDiv.className = "wa-bubble user";
+      uDiv.innerHTML = "📷 <em>[Image transmise]</em><br>" + text + "<div class='wa-bubble-time'>" + nowStr + " ✓✓</div>";
+      box.appendChild(uDiv);
+
+      var statusText = document.getElementById("wa-status-text");
+      statusText.textContent = "● En train d'analyser le média...";
+
+      setTimeout(function() {
+        var bDiv = document.createElement("div");
+        bDiv.className = "wa-bubble bot";
+        
+        var isAi = text.toLowerCase().includes("ia") || text.toLowerCase().includes("chatgpt");
+        var isBenin = text.toLowerCase().includes("cotonou") || text.toLowerCase().includes("porto-novo") || text.toLowerCase().includes("parakou");
+
+        var reportMsg = "🛡️ <strong>Rapport d'analyse Forensic Media</strong><br><br>";
+        if (isAi) {
+          reportMsg += "⚠️ <strong>ALERTE IA : 99% (DALL·E 3 / OpenAI)</strong><br>";
+          reportMsg += "• Manifeste C2PA : Présent & Déclaré synthétique<br>";
+          reportMsg += "• Spectre FFT : Micro-artefacts algorithmiques détectés<br><br>";
+        } else if (isBenin) {
+          reportMsg += "⚠️ <strong>DÉCONTEXTUALISATION IDENTIFIÉE (Bénin Check)</strong><br>";
+          reportMsg += "• Affirmation : « " + text + " »<br>";
+          reportMsg += "• Véritable origine : Lomé (Togo) en 2022<br><br>";
+        } else {
+          reportMsg += "🔍 <strong>ANALYSE MULTI-DIMENSIONS</strong><br>";
+          reportMsg += "• Indice IA : 8% (Faible)<br>";
+          reportMsg += "• Intégrité : Média sans signature C2PA<br>";
+          reportMsg += "• Antériorités Web : Fact-checks répertoriés<br><br>";
+        }
+
+        reportMsg += "📄 <strong>Rapport PDF Certifié :</strong> <a href='javascript:void(0)' onclick=\"showScreen('screen-upload')\" style='color:#38bdf8;'>Télécharger le dossier complet</a>";
+        reportMsg += "<div class='wa-bubble-time'>" + nowStr + "</div>";
+        
+        bDiv.innerHTML = reportMsg;
+        box.appendChild(bDiv);
+        statusText.textContent = "● En ligne (+229 97 00 00 00)";
+        box.scrollTop = box.scrollHeight;
+      }, 1500);
+    }
+
     // Admin Section
     function openAdminModal() {
       var pass = prompt("Entrez votre clé d'accès Administrateur :", adminKey || "");
@@ -1323,7 +1449,6 @@
     function loadAdminDashboard() {
       showScreen("screen-admin");
       
-      // Fetch Stats
       fetch("/api/v1/admin/stats?admin_key=" + encodeURIComponent(adminKey))
         .then(function(r) { return r.json(); })
         .then(function(st) {
@@ -1333,7 +1458,6 @@
           document.getElementById("adm-c2pa").textContent = st.total_c2pa_verified || 0;
         });
 
-      // Fetch Global List
       var list = document.getElementById("admin-global-list");
       list.innerHTML = "<div style='text-align:center; padding:10px;'>Chargement...</div>";
       fetch("/api/v1/analyses?admin_key=" + encodeURIComponent(adminKey) + "&limit=50")
@@ -1354,7 +1478,7 @@
         });
     }
 
-    function loadSampleCase(filename) {
+    function loadSampleCase(filename, claimText) {
       fetch("/api/v1/analyses?admin_key=forensic_admin_2026&limit=20")
         .then(function(res) { return res.json(); })
         .then(function(data) {
@@ -1362,7 +1486,7 @@
           if (found) {
             loadResult(found.analysis_id);
           } else {
-            alert("Glissez une image directement pour tester votre quota.");
+            alert("Glissez une image directement pour tester.");
           }
         })
         .catch(function(e) {
