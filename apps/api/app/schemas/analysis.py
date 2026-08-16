@@ -95,6 +95,14 @@ class AnalysisResultResponse(BaseModel):
     ai_status: Optional[AIStatus] = None
     context_status: Optional[ContextStatus] = None
     
+    # Precise AI Probabilities & C2PA Provenance Scores
+    ai_probability_score: Optional[float] = None # 0.0 to 1.0 (ex: 0.98 -> 98%)
+    ai_confidence_score: Optional[float] = None # 0.0 to 1.0 (ex: 0.99 -> 99%)
+    ai_generator_name: Optional[str] = None # ex: "OpenAI DALL·E 3 (ChatGPT)"
+    provenance_issuer: Optional[str] = None # ex: "OpenAI, LLC"
+    c2pa_valid: Optional[bool] = None
+    c2pa_digital_source: Optional[str] = None
+    
     summary_fr: Optional[str] = None
     evidences: List[EvidenceItem] = []
     
@@ -118,6 +126,8 @@ class AnalysisListItem(BaseModel):
     integrity_status: Optional[IntegrityStatus] = None
     ai_status: Optional[AIStatus] = None
     context_status: Optional[ContextStatus] = None
+    ai_probability_score: Optional[float] = None
+    ai_generator_name: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

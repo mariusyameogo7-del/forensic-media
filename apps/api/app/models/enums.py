@@ -5,6 +5,7 @@ class AccountType(str, enum.Enum):
     STANDARD = "standard"
     PROFESSIONAL = "professional"
     INSTITUTIONAL = "institutional"
+    ADMIN = "admin"
 
 
 class AnalysisStatus(str, enum.Enum):

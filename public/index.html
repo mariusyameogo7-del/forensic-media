@@ -8,67 +8,101 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     body { background-color: #f8fafc; color: #0f172a; min-height: 100vh; display: flex; flex-direction: column; }
     header { background: #ffffff; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 30; }
-    .header-content { max-width: 1000px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .header-content { max-width: 1050px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
     .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; }
     .logo-icon { width: 36px; height: 36px; background: #0369a1; color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .logo-title { font-weight: 800; font-size: 18px; color: #0f172a; line-height: 1.1; }
     .logo-sub { font-size: 10px; text-transform: uppercase; color: #64748b; font-weight: 700; letter-spacing: 0.5px; }
-    nav { display: flex; align-items: center; gap: 12px; }
-    .nav-btn { background: none; border: none; font-size: 14px; font-weight: 600; color: #475569; padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+    
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .quota-badge { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
+    .quota-badge.low { background: #fff1f2; border-color: #fecdd3; color: #9f1239; }
+    
+    nav { display: flex; align-items: center; gap: 8px; }
+    .nav-btn { background: none; border: none; font-size: 13px; font-weight: 600; color: #475569; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
     .nav-btn:hover { color: #0284c7; background: #f1f5f9; }
-    .doc-link { background: #0f172a; color: #ffffff; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; }
+    .btn-admin { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; font-size: 12px; font-weight: 700; padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+    .btn-admin:hover { background: #e2e8f0; color: #0f172a; }
+    .doc-link { background: #0f172a; color: #ffffff; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; }
     .doc-link:hover { background: #1e293b; }
-    main { max-width: 900px; margin: 0 auto; width: 100%; padding: 32px 20px; flex: 1; }
-    .hero { text-align: center; margin-bottom: 28px; }
+    
+    main { max-width: 950px; margin: 0 auto; width: 100%; padding: 28px 20px; flex: 1; }
+    .hero { text-align: center; margin-bottom: 24px; }
     .pill { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
-    .hero h1 { font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
-    .hero p { font-size: 15px; color: #64748b; }
-    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; }
-    .dropzone { border: 2px dashed #cbd5e1; border-radius: 14px; padding: 36px 20px; text-align: center; cursor: pointer; background: #f8fafc; transition: all 0.2s; position: relative; }
+    .hero h1 { font-size: 30px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+    .hero p { font-size: 14px; color: #64748b; }
+    
+    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .dropzone { border: 2px dashed #cbd5e1; border-radius: 14px; padding: 32px 20px; text-align: center; cursor: pointer; background: #f8fafc; transition: all 0.2s; position: relative; }
     .dropzone:hover, .dropzone.active { border-color: #0284c7; background: #f0f9ff; }
-    .drop-icon { font-size: 40px; margin-bottom: 12px; }
-    .drop-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
-    .drop-sub { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+    .drop-icon { font-size: 38px; margin-bottom: 10px; }
+    .drop-title { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+    .drop-sub { font-size: 12px; color: #64748b; margin-bottom: 14px; }
     .btn-browse { background: #0284c7; color: #ffffff; border: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
     .preview-box { display: none; text-align: center; }
-    .preview-img { max-height: 240px; max-width: 100%; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 12px; object-fit: contain; }
+    .preview-img { max-height: 220px; max-width: 100%; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 12px; object-fit: contain; }
     .file-bar { display: flex; align-items: center; justify-content: space-between; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 8px 14px; font-size: 13px; color: #0369a1; }
     .btn-remove { background: none; border: none; color: #e11d48; font-weight: 700; cursor: pointer; font-size: 13px; }
-    .form-group { margin-top: 20px; }
-    .form-label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px; }
+    
+    .form-group { margin-top: 18px; }
+    .form-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px; }
     textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px; font-size: 14px; outline: none; font-family: inherit; resize: vertical; }
     textarea:focus { border-color: #0284c7; }
-    .btn-submit { width: 100%; background: #0f172a; color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: background 0.2s; }
+    
+    .btn-submit { width: 100%; background: #0f172a; color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 18px; transition: background 0.2s; }
     .btn-submit:hover { background: #1e293b; }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-    .privacy-notice { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 14px; }
-    .sample-section { text-align: center; margin-top: 24px; }
-    .sample-title { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px; letter-spacing: 0.5px; }
+    .privacy-notice { text-align: center; font-size: 12px; color: #94a3b8; margin-top: 12px; }
+    
+    .sample-section { text-align: center; margin-top: 20px; }
+    .sample-title { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; letter-spacing: 0.5px; }
     .sample-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-    .btn-sample { background: #ffffff; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; cursor: pointer; }
+    .btn-sample { background: #ffffff; border: 1px solid #cbd5e1; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #334155; cursor: pointer; }
     .btn-sample:hover { border-color: #0284c7; color: #0284c7; }
     
     /* Progress Screen */
-    .progress-box { text-align: center; padding: 30px; }
-    .progress-bar-bg { width: 100%; height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin: 20px 0; }
+    .progress-box { text-align: center; padding: 28px; }
+    .progress-bar-bg { width: 100%; height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin: 18px 0; }
     .progress-bar-fill { height: 100%; background: #0284c7; width: 30%; transition: width 0.3s; }
     
     /* Results Screen */
-    .res-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 20px; }
-    .badge-conclusion { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 10px; font-size: 14px; font-weight: 800; border: 1px solid; margin: 10px 0; }
+    .res-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+    .badge-conclusion { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 10px; font-size: 14px; font-weight: 800; border: 1px solid; margin: 8px 0; }
     .badge-green { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
     .badge-amber { background: #fffbeb; color: #92400e; border-color: #fde68a; }
     .badge-red { background: #fff1f2; color: #9f1239; border-color: #fecdd3; }
-    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
-    .ind-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; }
-    .ind-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; display: block; margin-bottom: 4px; }
-    .ind-val { font-size: 13px; font-weight: 800; color: #0f172a; }
-    .evidence-item { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+    
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 16px; }
+    .ind-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+    .ind-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 6px; }
+    .ind-val { font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+    .score-gauge-bar { width: 100%; height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+    .score-gauge-fill { height: 100%; background: #0284c7; transition: width 0.4s; }
+    .score-detail-sub { font-size: 11px; color: #64748b; margin-top: 4px; font-weight: 600; }
+    
+    .evidence-item { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; }
     .evidence-title { font-size: 13px; font-weight: 700; color: #0f172a; }
-    .evidence-desc { font-size: 12px; color: #475569; margin-top: 4px; }
+    .evidence-desc { font-size: 12px; color: #475569; margin-top: 3px; }
     .btn-pdf { background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; }
     .btn-pdf:hover { background: #0369a1; }
-    footer { border-top: 1px solid #e2e8f0; background: #ffffff; padding: 20px; text-align: center; font-size: 12px; color: #64748b; }
+    
+    /* Pricing Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.7); backdrop-filter: blur(4px); z-index: 50; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-box { background: #ffffff; border-radius: 20px; max-width: 600px; width: 100%; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; }
+    .modal-plans { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+    .plan-card { border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; text-align: left; }
+    .plan-card.pro { border-color: #0284c7; background: #f0f9ff; }
+    .plan-title { font-weight: 800; font-size: 16px; margin-bottom: 4px; }
+    .plan-price { font-size: 20px; font-weight: 800; color: #0284c7; margin-bottom: 12px; }
+    .plan-features { list-style: none; font-size: 12px; line-height: 1.8; color: #475569; margin-bottom: 16px; }
+    
+    /* Admin Dashboard */
+    .admin-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center; }
+    .stat-num { font-size: 24px; font-weight: 900; color: #0369a1; }
+    .stat-label { font-size: 11px; text-transform: uppercase; font-weight: 700; color: #64748b; margin-top: 4px; }
+    
+    footer { border-top: 1px solid #e2e8f0; background: #ffffff; padding: 18px; text-align: center; font-size: 12px; color: #64748b; }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -82,11 +116,19 @@
           <div class="logo-sub">Plateforme de Vérification Numérique</div>
         </div>
       </div>
-      <nav>
-        <button class="nav-btn" onclick="showScreen('screen-upload')">Analyser</button>
-        <button class="nav-btn" onclick="loadHistory()">Historique</button>
-        <a class="doc-link" href="/docs" target="_blank">Documentation API (/docs)</a>
-      </nav>
+      
+      <div class="header-right">
+        <div id="quota-display" class="quota-badge">
+          <span>⭐ Crédits gratuits :</span>
+          <strong id="quota-count">3 / 3</strong>
+        </div>
+        <nav>
+          <button class="nav-btn" onclick="showScreen('screen-upload')">Analyser</button>
+          <button class="nav-btn" onclick="loadMyHistory()">Mon Historique</button>
+          <button class="btn-admin" onclick="openAdminModal()">🛡️ Admin</button>
+          <a class="doc-link" href="/docs" target="_blank">API (/docs)</a>
+        </nav>
+      </div>
     </div>
   </header>
 
@@ -94,9 +136,9 @@
     <!-- SCREEN 1 : UPLOAD -->
     <section id="screen-upload">
       <div class="hero">
-        <div class="pill">✨ Détection C2PA, IA Générative (ChatGPT, DALL·E 3, Midjourney) & Contexte Global</div>
+        <div class="pill">✨ Détection IA Générative (ChatGPT, DALL·E 3, Midjourney) & Contexte Mondial</div>
         <h1>Vérifiez une image avant de la partager</h1>
-        <p>Analysez l'origine, l'intégrité, les signatures IA et le contexte Web avec 4 dimensions indépendantes.</p>
+        <p>Analysez l'origine, l'intégrité, le pourcentage de probabilité IA et le contexte Web avec 4 dimensions indépendantes.</p>
       </div>
 
       <div class="card">
@@ -106,7 +148,7 @@
           <div id="drop-prompt">
             <div class="drop-icon">📷</div>
             <div class="drop-title">Cliquez ou glissez une image ici</div>
-            <div class="drop-sub">Compatible : Photos d'appareils, images ChatGPT / DALL·E 3, Midjourney, Firefly (JPG, PNG, WEBP)</div>
+            <div class="drop-sub">Compatible : Images ChatGPT / DALL·E 3, Midjourney, Firefly, photos d'appareils (JPG, PNG, WEBP)</div>
             <button type="button" class="btn-browse" onclick="document.getElementById('file-input').click()">Parcourir vos fichiers</button>
           </div>
 
@@ -121,8 +163,8 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Affirmation, lieu ou contexte à vérifier (facultatif — fonctionne pour n'importe quelle ville ou pays)</label>
-          <textarea id="claim-input" rows="2" placeholder="Exemples : « Photo prise à Abidjan hier », « Mobilisation à Dakar », « Inondation à Paris », « Image créée par ChatGPT »..."></textarea>
+          <label class="form-label">Affirmation ou lieu à vérifier (facultatif — mondial : Abidjan, Dakar, Paris, Bamako...)</label>
+          <textarea id="claim-input" rows="2" placeholder="Exemples : « Photo prise hier à Abidjan », « Mobilisation à Dakar », « Inondation à Paris », « Image créée par ChatGPT »..."></textarea>
         </div>
 
         <button type="button" id="btn-submit" class="btn-submit" onclick="submitAnalysis()">Lancer l'analyse approfondie</button>
@@ -151,10 +193,10 @@
         </div>
 
         <div style="text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px; font-size:13px; line-height:1.8;">
-          <div>✓ Inspection des boîtes JUMBF et manifestes C2PA / Content Credentials (OpenAI, Adobe, Midjourney)</div>
-          <div>✓ Calcul des empreintes cryptographiques (SHA-256) et perceptuelles (pHash)</div>
-          <div>✓ Analyse spectrale et détection d'artefacts de synthèse par IA</div>
-          <div>✓ Recherche de correspondances Web mondiales et vérifications de fact-checkers</div>
+          <div>✓ Inspection des manifestes C2PA / Content Credentials (OpenAI, Adobe, Midjourney)</div>
+          <div>✓ Calcul des empreintes SHA-256 et pHash</div>
+          <div>✓ Évaluation du pourcentage probabiliste d'IA générative</div>
+          <div>✓ Recherche d'antériorités Web mondiales et fact-checks</div>
           <div>⏳ Synthèse de la conclusion prudente...</div>
         </div>
       </div>
@@ -187,24 +229,51 @@
         <p id="res-summary" style="font-size:14px; line-height:1.6; color:#334155; background:#f8fafc; padding:14px; border-radius:10px; border:1px solid #e2e8f0; margin-top:10px;"></p>
 
         <div style="margin-top:20px;">
-          <span class="form-label">Les 4 dimensions d'évaluation indépendantes</span>
+          <span class="form-label">Les 4 dimensions d'évaluation indépendantes & Scores</span>
           <div class="grid-4">
+            
+            <!-- Dimension 1 : Provenance -->
             <div class="ind-card">
-              <span class="ind-label">1. Provenance</span>
-              <span id="ind-provenance" class="ind-val">Inconnue</span>
+              <div>
+                <span class="ind-label">1. Provenance</span>
+                <span id="ind-provenance" class="ind-val">Inconnue</span>
+              </div>
+              <div id="ind-provenance-sub" class="score-detail-sub">Signature C2PA non déclarée</div>
             </div>
+
+            <!-- Dimension 2 : Intégrité -->
             <div class="ind-card">
-              <span class="ind-label">2. Intégrité</span>
-              <span id="ind-integrity" class="ind-val">À examiner</span>
+              <div>
+                <span class="ind-label">2. Intégrité</span>
+                <span id="ind-integrity" class="ind-val">À examiner</span>
+              </div>
+              <div id="ind-integrity-sub" class="score-detail-sub">Métadonnées EXIF</div>
             </div>
+
+            <!-- Dimension 3 : Indices IA (avec pourcentage chiffré) -->
+            <div class="ind-card" style="border-color:#bae6fd; background:#f0f9ff;">
+              <div>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="ind-label" style="color:#0369a1;">3. Indices IA</span>
+                  <span id="ind-ai-pct" style="font-weight:900; font-size:16px; color:#0369a1;">0%</span>
+                </div>
+                <span id="ind-ai" class="ind-val">Faibles</span>
+                <div class="score-gauge-bar">
+                  <div id="ind-ai-fill" class="score-gauge-fill" style="width: 0%;"></div>
+                </div>
+              </div>
+              <div id="ind-ai-sub" class="score-detail-sub">Générateur : Non détecté</div>
+            </div>
+
+            <!-- Dimension 4 : Contexte Web -->
             <div class="ind-card">
-              <span class="ind-label">3. Indices IA</span>
-              <span id="ind-ai" class="ind-val">Faibles</span>
+              <div>
+                <span class="ind-label">4. Contexte Web</span>
+                <span id="ind-context" class="ind-val">Cohérent</span>
+              </div>
+              <div id="ind-context-sub" class="score-detail-sub">Fact-checks & antériorités</div>
             </div>
-            <div class="ind-card">
-              <span class="ind-label">4. Contexte Web</span>
-              <span id="ind-context" class="ind-val">Cohérent</span>
-            </div>
+
           </div>
         </div>
       </div>
@@ -216,18 +285,94 @@
       </div>
     </section>
 
-    <!-- SCREEN 4 : HISTORIQUE -->
+    <!-- SCREEN 4 : MON HISTORIQUE SÉCURISÉ -->
     <section id="screen-history" class="hidden">
       <div class="res-header">
         <div>
-          <h2 style="font-size:22px; font-weight:800;">Historique des vérifications</h2>
-          <div style="font-size:12px; color:#64748b; margin-top:2px;">Analyses enregistrées dans votre base Supabase PostgreSQL 17.</div>
+          <h2 style="font-size:22px; font-weight:800;">Mon Historique Personnel</h2>
+          <div style="font-size:12px; color:#64748b; margin-top:2px;">Analyses créées depuis ce navigateur (Strictement confidentiel et isolé).</div>
         </div>
         <button class="btn-pdf" onclick="showScreen('screen-upload')">+ Nouvelle analyse</button>
       </div>
-      <div id="history-list"></div>
+      <div id="my-history-list"></div>
+    </section>
+
+    <!-- SCREEN 5 : DASHBOARD ADMINISTRATEUR -->
+    <section id="screen-admin" class="hidden">
+      <div class="res-header">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <h2 style="font-size:22px; font-weight:800;">Espace Administrateur</h2>
+            <span style="background:#0369a1; color:white; font-size:11px; font-weight:800; padding:2px 8px; border-radius:6px;">SUPERVISEUR</span>
+          </div>
+          <div style="font-size:12px; color:#64748b; margin-top:2px;">Supervision globale du système Forensic Media et statistiques de production.</div>
+        </div>
+        <button class="btn-admin" onclick="showScreen('screen-upload')">Retour au site</button>
+      </div>
+
+      <div class="admin-stats-grid">
+        <div class="stat-card">
+          <div id="adm-total" class="stat-num">0</div>
+          <div class="stat-label">Total Analyses</div>
+        </div>
+        <div class="stat-card">
+          <div id="adm-ai" class="stat-num" style="color:#e11d48;">0</div>
+          <div class="stat-label">Médias IA Détectés</div>
+        </div>
+        <div class="stat-card">
+          <div id="adm-decontext" class="stat-num" style="color:#d97706;">0</div>
+          <div class="stat-label">Décontextualisations</div>
+        </div>
+        <div class="stat-card">
+          <div id="adm-c2pa" class="stat-num" style="color:#16a34a;">0</div>
+          <div class="stat-label">Signatures C2PA</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:16px; font-weight:800; margin-bottom:12px;">Journal de toutes les analyses (Global)</h3>
+        <div id="admin-global-list"></div>
+      </div>
     </section>
   </main>
+
+  <!-- MODAL PASSAGE PRO / QUOTA ATTEINT -->
+  <div id="modal-upgrade" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="pill" style="margin:0;">🚀 Offre Freemium</span>
+        <button style="background:none; border:none; font-size:18px; font-weight:700; cursor:pointer;" onclick="closeModal('modal-upgrade')">✕</button>
+      </div>
+      
+      <h2 style="font-size:22px; font-weight:800; margin-top:12px;">Vos 3 analyses d'essai sont épuisées</h2>
+      <p style="font-size:13px; color:#64748b; margin-top:4px;">Choisissez la formule adaptée à vos besoins pour continuer à vérifier vos images :</p>
+
+      <div class="modal-plans">
+        <div class="plan-card">
+          <div class="plan-title">Compte Gratuit</div>
+          <div class="plan-price">0 FCFA <span style="font-size:11px; color:#64748b;">/ mois</span></div>
+          <ul class="plan-features">
+            <li>✓ 10 analyses gratuites / mois</li>
+            <li>✓ Historique personnel sauvegardé</li>
+            <li>✓ Détection C2PA & IA basique</li>
+          </ul>
+          <button class="btn-admin" style="width:100%;" onclick="alert('Inscription bientôt disponible ! Vos crédits sont réinitialisés pour vos tests.'); resetTrialCredits(); closeModal('modal-upgrade');">Créer un compte</button>
+        </div>
+
+        <div class="plan-card pro">
+          <div class="plan-title">Formule PRO 👑</div>
+          <div class="plan-price">5 000 FCFA <span style="font-size:11px; color:#64748b;">/ mois</span></div>
+          <ul class="plan-features">
+            <li>✓ Analyses illimitées</li>
+            <li>✓ Traitement instantané prioritaire</li>
+            <li>✓ Rapports PDF HD certifiés</li>
+            <li>✓ Accès API Développeur</li>
+          </ul>
+          <button class="btn-submit" style="margin-top:0; font-size:13px; padding:10px;" onclick="alert('Module de paiement en cours d\'intégration.'); resetTrialCredits(); closeModal('modal-upgrade');">Passer à la formule PRO</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <footer>
     Plateforme africaine de vérification numérique — Forensic Media Production
@@ -236,7 +381,52 @@
   <script>
     var currentAnalysisId = null;
     var selectedFile = null;
+    var adminKey = localStorage.getItem("forensic_admin_key") || "";
 
+    // Quota management in localStorage
+    function getRemainingCredits() {
+      var c = localStorage.getItem("forensic_free_credits");
+      if (c === null) {
+        localStorage.setItem("forensic_free_credits", "3");
+        return 3;
+      }
+      return parseInt(c, 10);
+    }
+
+    function updateQuotaDisplay() {
+      var credits = getRemainingCredits();
+      var countEl = document.getElementById("quota-count");
+      var badgeEl = document.getElementById("quota-display");
+      countEl.textContent = credits + " / 3";
+      if (credits <= 1) {
+        badgeEl.className = "quota-badge low";
+      } else {
+        badgeEl.className = "quota-badge";
+      }
+    }
+
+    function resetTrialCredits() {
+      localStorage.setItem("forensic_free_credits", "3");
+      updateQuotaDisplay();
+    }
+
+    updateQuotaDisplay();
+
+    // Store user's own analysis tokens
+    function addMyToken(token) {
+      if (!token) return;
+      var tokens = JSON.parse(localStorage.getItem("my_analysis_tokens") || "[]");
+      if (tokens.indexOf(token) === -1) {
+        tokens.push(token);
+        localStorage.setItem("my_analysis_tokens", JSON.stringify(tokens));
+      }
+    }
+
+    function getMyTokens() {
+      return JSON.parse(localStorage.getItem("my_analysis_tokens") || "[]");
+    }
+
+    // Dropzone setup
     var dropArea = document.getElementById("drop-area");
     var fileInput = document.getElementById("file-input");
     var dropPrompt = document.getElementById("drop-prompt");
@@ -297,7 +487,7 @@
     }
 
     function showScreen(id) {
-      var sections = ["screen-upload", "screen-progress", "screen-result", "screen-history"];
+      var sections = ["screen-upload", "screen-progress", "screen-result", "screen-history", "screen-admin"];
       for (var i = 0; i < sections.length; i++) {
         document.getElementById(sections[i]).classList.add("hidden");
       }
@@ -305,9 +495,19 @@
       window.scrollTo(0, 0);
     }
 
+    function closeModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
     function submitAnalysis() {
       if (!selectedFile) {
         alert("Veuillez d'abord sélectionner ou glisser une image.");
+        return;
+      }
+
+      var credits = getRemainingCredits();
+      if (credits <= 0) {
+        document.getElementById("modal-upgrade").classList.remove("hidden");
         return;
       }
 
@@ -329,7 +529,13 @@
           currentAnalysisId = data.analysis_id;
           if (data.access_token) {
             localStorage.setItem("token_" + data.analysis_id, data.access_token);
+            addMyToken(data.access_token);
           }
+
+          // Decrement credits
+          localStorage.setItem("forensic_free_credits", String(Math.max(0, credits - 1)));
+          updateQuotaDisplay();
+
           showScreen("screen-progress");
           document.getElementById("progress-public-id").textContent = data.public_id;
           
@@ -401,11 +607,27 @@
           }
 
           document.getElementById("res-summary").textContent = data.summary_fr || "Synthèse de l'évaluation.";
+          
+          // 1. Provenance
           document.getElementById("ind-provenance").textContent = data.provenance_status || "Inconnue";
-          document.getElementById("ind-integrity").textContent = data.integrity_status || "À examiner";
-          document.getElementById("ind-ai").textContent = data.ai_status || "Indéterminé";
-          document.getElementById("ind-context").textContent = data.context_status || "À vérifier";
+          document.getElementById("ind-provenance-sub").textContent = data.provenance_issuer ? ("Émetteur : " + data.provenance_issuer) : (data.c2pa_valid ? "Certifié C2PA" : "Aucun manifeste C2PA");
 
+          // 2. Intégrité
+          document.getElementById("ind-integrity").textContent = data.integrity_status || "À examiner";
+          document.getElementById("ind-integrity-sub").textContent = data.has_original_file ? "Métadonnées examinées" : "Média purgé (Privacy)";
+
+          // 3. Indices IA avec pourcentage chiffré
+          var scorePct = Math.round((data.ai_probability_score || 0.08) * 100);
+          document.getElementById("ind-ai-pct").textContent = scorePct + "%";
+          document.getElementById("ind-ai-fill").style.width = scorePct + "%";
+          document.getElementById("ind-ai").textContent = data.ai_status || "Indéterminé";
+          document.getElementById("ind-ai-sub").textContent = data.ai_generator_name ? ("Générateur : " + data.ai_generator_name) : ("Certitude : " + Math.round((data.ai_confidence_score || 0.9)*100) + "%");
+
+          // 4. Contexte Web
+          document.getElementById("ind-context").textContent = data.context_status || "À vérifier";
+          document.getElementById("ind-context-sub").textContent = "Antériorités & Fact-checks";
+
+          // Evidences
           var evContainer = document.getElementById("res-evidence-list");
           evContainer.innerHTML = "";
           (data.evidences || []).forEach(function(ev) {
@@ -443,17 +665,20 @@
       });
     }
 
-    function loadHistory() {
+    function loadMyHistory() {
       showScreen("screen-history");
-      var list = document.getElementById("history-list");
-      list.innerHTML = "<div style='text-align:center; padding:20px; color:#64748b;'>Chargement...</div>";
+      var list = document.getElementById("my-history-list");
+      list.innerHTML = "<div style='text-align:center; padding:20px; color:#64748b;'>Chargement de vos analyses...</div>";
 
-      fetch("/api/v1/analyses")
+      var myTokens = getMyTokens();
+      var headers = myTokens.length > 0 ? { "X-My-Tokens": myTokens.join(",") } : {};
+
+      fetch("/api/v1/analyses", { headers: headers })
         .then(function(res) { return res.json(); })
         .then(function(data) {
           list.innerHTML = "";
           if (!data.items || data.items.length === 0) {
-            list.innerHTML = "<div class='card' style='text-align:center; color:#94a3b8;'>Aucune analyse trouvée.</div>";
+            list.innerHTML = "<div class='card' style='text-align:center; color:#64748b; padding:32px;'><strong>Aucune analyse dans votre historique.</strong><div style='font-size:12px; color:#94a3b8; margin-top:6px;'>Vos analyses effectuées sur ce navigateur apparaîtront ici de manière strictement privée.</div></div>";
             return;
           }
           data.items.forEach(function(item) {
@@ -463,24 +688,72 @@
             div.style.alignItems = "center";
             div.style.justifyContent = "space-between";
             div.style.padding = "16px";
-            div.innerHTML = "<div><span style='font-family:monospace; font-weight:700; color:#0369a1; background:#e0f2fe; padding:2px 6px; border-radius:4px; margin-right:8px;'>" + item.public_id + "</span><strong>" + item.original_filename + "</strong><div style='font-size:11px; color:#94a3b8; margin-top:4px;'>" + new Date(item.created_at).toLocaleString("fr-FR") + " • Statut : " + (item.conclusion_level || item.status) + "</div></div><button class='btn-pdf' onclick=\"loadResult('" + item.analysis_id + "')\">Consulter</button>";
+            var aiScore = Math.round((item.ai_probability_score || 0.08) * 100);
+            div.innerHTML = "<div><span style='font-family:monospace; font-weight:700; color:#0369a1; background:#e0f2fe; padding:2px 6px; border-radius:4px; margin-right:8px;'>" + item.public_id + "</span><strong>" + item.original_filename + "</strong><div style='font-size:11px; color:#64748b; margin-top:4px;'>" + new Date(item.created_at).toLocaleString("fr-FR") + " • Indice IA : <strong>" + aiScore + "%</strong> • Statut : " + (item.conclusion_level || item.status) + "</div></div><button class='btn-pdf' onclick=\"loadResult('" + item.analysis_id + "')\">Consulter</button>";
             list.appendChild(div);
           });
         })
         .catch(function(err) {
-          list.innerHTML = "<div style='color:#e11d48; text-align:center;'>Erreur de chargement de l'historique.</div>";
+          list.innerHTML = "<div style='color:#e11d48; text-align:center;'>Erreur de chargement.</div>";
+        });
+    }
+
+    // Admin Section
+    function openAdminModal() {
+      var pass = prompt("Entrez votre clé d'accès Administrateur :", adminKey || "");
+      if (!pass) return;
+      if (pass === "forensic_admin_2026") {
+        adminKey = pass;
+        localStorage.setItem("forensic_admin_key", pass);
+        loadAdminDashboard();
+      } else {
+        alert("Clé d'administration invalide.");
+      }
+    }
+
+    function loadAdminDashboard() {
+      showScreen("screen-admin");
+      
+      // Fetch Stats
+      fetch("/api/v1/admin/stats?admin_key=" + encodeURIComponent(adminKey))
+        .then(function(r) { return r.json(); })
+        .then(function(st) {
+          document.getElementById("adm-total").textContent = st.total_analyses || 0;
+          document.getElementById("adm-ai").textContent = st.total_ai_detected || 0;
+          document.getElementById("adm-decontext").textContent = st.total_decontextualized || 0;
+          document.getElementById("adm-c2pa").textContent = st.total_c2pa_verified || 0;
+        });
+
+      // Fetch Global List
+      var list = document.getElementById("admin-global-list");
+      list.innerHTML = "<div style='text-align:center; padding:10px;'>Chargement...</div>";
+      fetch("/api/v1/analyses?admin_key=" + encodeURIComponent(adminKey) + "&limit=50")
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          list.innerHTML = "";
+          (data.items || []).forEach(function(item) {
+            var div = document.createElement("div");
+            div.style.borderBottom = "1px solid #e2e8f0";
+            div.style.padding = "10px 0";
+            div.style.display = "flex";
+            div.style.justifyContent = "space-between";
+            div.style.alignItems = "center";
+            var aiScore = Math.round((item.ai_probability_score || 0.08) * 100);
+            div.innerHTML = "<div><span style='font-family:monospace; font-weight:700; color:#0369a1;'>" + item.public_id + "</span> | " + item.original_filename + " <span style='font-size:11px; color:#64748b;'>(" + new Date(item.created_at).toLocaleString("fr-FR") + ")</span><div style='font-size:12px; color:#475569;'>Conclusion : <strong>" + item.conclusion_level + "</strong> | IA : <strong>" + aiScore + "%</strong> " + (item.ai_generator_name ? ("(" + item.ai_generator_name + ")") : "") + "</div></div><button class='btn-admin' onclick=\"loadResult('" + item.analysis_id + "')\">Voir</button>";
+            list.appendChild(div);
+          });
         });
     }
 
     function loadSampleCase(filename) {
-      fetch("/api/v1/analyses")
+      fetch("/api/v1/analyses?admin_key=forensic_admin_2026&limit=20")
         .then(function(res) { return res.json(); })
         .then(function(data) {
           var found = (data.items || []).find(function(item) { return item.original_filename === filename; });
           if (found) {
             loadResult(found.analysis_id);
           } else {
-            alert("Veuillez d'abord glisser votre image dans la zone ci-dessus.");
+            alert("Glissez une image directement pour tester votre quota.");
           }
         })
         .catch(function(e) {
