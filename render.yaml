@@ -1,13 +1,12 @@
 services:
-  # 1. FastAPI Backend API (Render Frankfurt)
+  # 1. Forensic Media App (FastAPI + Interactive Web UI + Supabase Frankfurt)
   - type: web
-    name: forensic-media-api
-    env: docker
-    region: fra
+    name: forensic-media-app
+    env: python
+    region: frankfurt
     plan: free
-    dockerfilePath: infra/docker/api.Dockerfile
-    dockerContext: .
-    healthCheckPath: /api/v1/health
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: ENVIRONMENT
         value: production
@@ -15,6 +14,8 @@ services:
         value: "false"
       - key: API_V1_STR
         value: /api/v1
+      - key: PYTHONPATH
+        value: .
       - key: DATABASE_URL
         value: postgresql+psycopg://postgres.qabyrfzkrbqxldfybnid:Q9%2BR%25v3b2ny.Wt.@aws-1-eu-west-1.pooler.supabase.com:6543/postgres
       - key: SUPABASE_URL
@@ -31,17 +32,3 @@ services:
         value: media-previews
       - key: STORAGE_BUCKET_REPORTS
         value: analysis-reports
-
-  # 2. Next.js / Web Application (Render Frankfurt)
-  - type: web
-    name: forensic-media-web
-    env: node
-    region: fra
-    plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm start
-    envVars:
-      - key: NEXT_PUBLIC_SUPABASE_URL
-        value: https://qabyrfzkrbqxldfybnid.supabase.co
-      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
-        value: sb_publishable_2t8bdDFBnJ-WKA1mM7-jbQ_r65ElgnA
