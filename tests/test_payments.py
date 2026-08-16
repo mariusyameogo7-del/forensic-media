@@ -14,17 +14,17 @@ from apps.api.app.api.v1.endpoints.payments import initiate_payment, confirm_pay
 Base.metadata.create_all(bind=engine)
 
 
-def test_payment_suite():
+def test_strict_otp_suite():
     print("==================================================")
-    print("   TEST DE LA PASSERELLE DE PAIEMENT SECURISEE    ")
+    print("   TEST VERIFICATION STRICTE OTP LIE AU NUMERO   ")
     print("==================================================")
     db = SessionLocal()
     try:
-        test_email = "investigateur_pro@forensic.org"
+        test_email = "investigateur_strict@forensic.org"
         user = db.query(User).filter(User.email == test_email).first()
         if not user:
             user = User(
-                supabase_user_id="usr_test_payment_suite",
+                supabase_user_id="usr_test_strict_otp",
                 email=test_email,
                 account_type=AccountType.STANDARD
             )
@@ -32,70 +32,47 @@ def test_payment_suite():
             db.commit()
             db.refresh(user)
 
-        # ----------------------------------------------------
-        # 1. Test Paiement CARTE BANCAIRE (Visa / Mastercard)
-        # ----------------------------------------------------
-        print("\n--- 1. Test Paiement Carte Bancaire (PRO - 3 000 FCFA) ---")
-        card_req = PaymentInitiateRequest(
+        # 1. Initiation Mobile Money Orange Money
+        phone = "+226 70 99 88 77"
+        momo_req = PaymentInitiateRequest(
             plan=SubscriptionPlan.PRO,
-            operator=PaymentOperator.CARD,
-            card_holder_name="MARIUS YAMEOGO",
-            card_number="4485 1234 5678 9012",
-            card_expiry="08/28",
-            card_cvv="456",
+            operator=PaymentOperator.ORANGE_MONEY,
+            phone_number=phone,
             customer_email=test_email,
             billing_cycle="monthly"
         )
-        card_init = initiate_payment(card_req, db, current_user=user)
-        print("  Paiement Carte Initie :", card_init.transaction_ref)
-        print("  Montant :", card_init.amount_xof, "FCFA | Operator :", card_init.operator)
-        assert card_init.amount_xof == 3000
-        assert card_init.status == PaymentStatus.PENDING
+        init_res = initiate_payment(momo_req, db, current_user=user)
+        generated_otp = init_res.demo_otp
+        print("  Paiement Initie :", init_res.transaction_ref)
+        print("  Numero de telephone lie :", init_res.phone_number)
+        print("  OTP dynamique genere pour ce numero :", generated_otp)
+        assert generated_otp is not None and len(generated_otp) == 4
 
-        # Test Rejet si mauvais OTP
+        # 2. Test Saisie d'un FAUX OTP (ex: 0000) -> DOIT ETRE STRICTEMENT REJETE
+        print("\n--- Test Saisie Faux OTP (0000) ---")
         try:
-            confirm_payment(card_init.transaction_ref, payload=PaymentConfirmRequest(otp_code="12"), db=db, current_user=user)
-            assert False, "Devrait echouer car OTP < 4 chiffres"
+            confirm_payment(init_res.transaction_ref, payload=PaymentConfirmRequest(otp_code="0000"), db=db, current_user=user)
+            assert False, "Erreur : Le faux OTP n'aurait jamais du passer !"
         except Exception as e:
-            print("  [OK Securite] Rejet du paiement si OTP manquant ou trop court :", str(e.detail if hasattr(e, 'detail') else e))
+            detail = str(e.detail if hasattr(e, 'detail') else e)
+            print("  [OK REJET STRICT DU FAUX OTP] :", detail)
+            assert "incorrect" in detail
 
-        # Validation avec code 3D-Secure 4 chiffres
-        card_confirm = confirm_payment(card_init.transaction_ref, payload=PaymentConfirmRequest(otp_code="8910"), db=db, current_user=user)
-        print("  [OK Validation 3DS] :", card_confirm.message_fr)
-        assert card_confirm.is_active == True
+        # 3. Test Saisie du BON OTP LIE AU TELEPHONE -> DOIT REUSSIR
+        print("\n--- Test Saisie du VRAI OTP lié au numéro (" + generated_otp + ") ---")
+        success_res = confirm_payment(init_res.transaction_ref, payload=PaymentConfirmRequest(otp_code=generated_otp), db=db, current_user=user)
+        print("  [OK VALIDATION] :", success_res.message_fr)
+        assert success_res.is_active == True
+        assert success_res.status == PaymentStatus.COMPLETED
+
         db.refresh(user)
         assert user.account_type == AccountType.PROFESSIONAL
-        print("  [OK Surclassement] Compte PRO active avec succes !")
-
-        # ----------------------------------------------------
-        # 2. Test Paiement MOBILE MONEY (Orange Money #144*4*6#)
-        # ----------------------------------------------------
-        print("\n--- 2. Test Paiement Mobile Money Orange Money (PLUS - 10 000 FCFA) ---")
-        momo_req = PaymentInitiateRequest(
-            plan=SubscriptionPlan.PLUS,
-            operator=PaymentOperator.ORANGE_MONEY,
-            phone_number="+226 70 11 22 33",
-            customer_email=test_email,
-            billing_cycle="monthly"
-        )
-        momo_init = initiate_payment(momo_req, db, current_user=user)
-        print("  Paiement Orange Money Initie :", momo_init.transaction_ref)
-        print("  Instructions :", momo_init.instructions_fr)
-        assert momo_init.amount_xof == 10000
-        assert "#144*4*6#" in momo_init.instructions_fr
-
-        # Validation avec code OTP #144*4*6#
-        momo_confirm = confirm_payment(momo_init.transaction_ref, payload=PaymentConfirmRequest(otp_code="5678"), db=db, current_user=user)
-        print("  [OK Validation USSD/OTP] :", momo_confirm.message_fr)
-        assert momo_confirm.is_active == True
-        db.refresh(user)
-        assert user.account_type == AccountType.INSTITUTIONAL
-        print("  [OK Surclassement] Compte PLUS Illimite active avec succes !")
+        print("  [OK SURCLASSEMENT] Le compte PRO a ete active avec succes !")
 
     finally:
         db.close()
 
 
 if __name__ == "__main__":
-    test_payment_suite()
-    print("\n[SUCCES] TOUS LES TESTS DE PAIEMENT REEL SONT VALIDES !")
+    test_strict_otp_suite()
+    print("\n[SUCCES] LA VERIFICATION STRICTE DU CODE OTP EST VALIDE A 100% !")

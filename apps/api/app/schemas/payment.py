@@ -20,7 +20,7 @@ class PaymentInitiateRequest(BaseModel):
 
 
 class PaymentConfirmRequest(BaseModel):
-    otp_code: Optional[str] = Field(None, description="Code OTP Mobile Money (ex: 4 à 6 chiffres) ou code 3D-Secure")
+    otp_code: str = Field(..., description="Code OTP Mobile Money (ex: 4 à 6 chiffres) lié au numéro de téléphone ou code 3D-Secure")
 
 
 class PaymentInitiateResponse(BaseModel):
@@ -31,8 +31,10 @@ class PaymentInitiateResponse(BaseModel):
     operator: PaymentOperator
     status: PaymentStatus
     instructions_fr: str
+    phone_number: Optional[str] = None
     ussd_code: Optional[str] = None
     requires_otp: bool = True
+    demo_otp: Optional[str] = None  # Pour affichage transparent de la notification SMS simulée
     checkout_url: Optional[str] = None
     created_at: datetime
 

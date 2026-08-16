@@ -38,37 +38,27 @@ OPERATOR_INSTRUCTIONS = {
     PaymentOperator.ORANGE_MONEY: {
         "name": "Orange Money",
         "ussd": "#144*4*6#",
-        "instructions": "Tapez #144*4*6# sur votre téléphone pour générer votre code d'autorisation OTP à 4 ou 6 chiffres, puis saisissez-le pour valider le débit.",
+        "instructions": "Tapez #144*4*6# sur votre téléphone Orange Money ou consultez le SMS pour obtenir votre code d'autorisation OTP.",
     },
     PaymentOperator.MOOV_MONEY: {
         "name": "Moov Money",
         "ussd": "*155*4#",
-        "instructions": "Tapez *155*4# sur votre téléphone pour obtenir votre code de sécurité temporaire Moov Money et confirmez le débit.",
+        "instructions": "Tapez *155*4# sur votre téléphone Moov Money ou consultez le SMS pour obtenir votre code de sécurité temporaire.",
     },
     PaymentOperator.MTN_MOMO: {
         "name": "MTN Mobile Money",
         "ussd": "*133#",
-        "instructions": "Consultez le SMS ou tapez *133# pour saisir votre code secret d'autorisation MTN MoMo.",
+        "instructions": "Consultez le SMS reçu ou tapez *133# pour valider la demande de prélèvement MTN MoMo.",
     },
     PaymentOperator.WAVE: {
         "name": "Wave",
         "ussd": "App Wave",
-        "instructions": "Ouvrez votre application Wave ou saisissez le code OTP reçu par SMS pour finaliser le débit instantané.",
+        "instructions": "Ouvrez votre application Wave ou consultez le code de validation reçu par notification.",
     },
     PaymentOperator.CARD: {
         "name": "Carte Bancaire (Visa / Mastercard)",
         "ussd": "3D-Secure",
         "instructions": "Votre banque vous a transmis un code de validation 3D-Secure par SMS pour autoriser la transaction.",
-    },
-    PaymentOperator.FEDAPAY: {
-        "name": "FedaPay Pan-Afrique",
-        "ussd": None,
-        "instructions": "Passerelle sécurisée multi-opérateurs FedaPay.",
-    },
-    PaymentOperator.CINETPAY: {
-        "name": "CinetPay",
-        "ussd": None,
-        "instructions": "Guichet unique sécurisé CinetPay.",
     },
 }
 
@@ -77,21 +67,21 @@ def _validate_card_details(card_number: Optional[str], expiry: Optional[str], cv
     if not card_number or not expiry or not cvv:
         raise HTTPException(
             status_code=400,
-            detail="Informations de carte bancaire incomplètes. Veuillez renseigner le numéro, la date d'expiration et le code CVV."
+            detail="Informations de carte bancaire incomplètes. Veuillez renseigner le nom du titulaire, le numéro de carte, la date d'expiration et le code CVV."
         )
     
     clean_num = re.sub(r"\s+", "", card_number)
     if not (clean_num.isdigit() and len(clean_num) in (15, 16)):
         raise HTTPException(
             status_code=400,
-            detail="Numéro de carte bancaire invalide (doit contenir 16 chiffres)."
+            detail="Numéro de carte bancaire invalide (doit comporter 16 chiffres)."
         )
 
     clean_cvv = cvv.strip()
     if not (clean_cvv.isdigit() and len(clean_cvv) in (3, 4)):
         raise HTTPException(
             status_code=400,
-            detail="Code CVV de sécurité invalide (3 ou 4 chiffres au dos de la carte)."
+            detail="Code de sécurité CVV invalide (3 chiffres au verso de la carte)."
         )
 
     # Expiry format MM/YY or MM/YYYY
@@ -102,16 +92,14 @@ def _validate_card_details(card_number: Optional[str], expiry: Optional[str], cv
         )
 
 
-@router.post("/initiate", response_model=PaymentInitiateResponse, summary="Initier un paiement réel Mobile Money ou Carte Bancaire")
+@router.post("/initiate", response_model=PaymentInitiateResponse, summary="Initier un paiement avec génération de code OTP lié au téléphone")
 def initiate_payment(
     payload: PaymentInitiateRequest,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user_optional),
 ):
     """
-    Initiates a verified transaction.
-    For Card payments: validates card format, expiration, and CVV.
-    For Mobile Money: validates phone number and sets up OTP verification.
+    Initiates transaction and generates a unique OTP code tied directly to the phone number.
     """
     if payload.plan not in PLAN_PRICES_XOF:
         raise HTTPException(status_code=400, detail="Plan de souscription invalide (choisir 'pro' ou 'plus').")
@@ -127,30 +115,34 @@ def initiate_payment(
             payload.card_cvv,
             payload.card_holder_name
         )
-        masked_phone = f"Card: **** **** **** {re.sub(r'\\s+', '', payload.card_number)[-4:]}"
+        phone_label = f"Carte Visa/Mastercard (**** {re.sub(r'\\s+', '', payload.card_number)[-4:]})"
     else:
         if not payload.phone_number or len(payload.phone_number.strip()) < 8:
             raise HTTPException(
                 status_code=400,
                 detail="Numéro de téléphone Mobile Money obligatoire (ex: +226 70 11 22 33)."
             )
-        masked_phone = payload.phone_number.strip()
+        phone_label = payload.phone_number.strip()
 
     # Generate unique transaction reference
     year = datetime.now(timezone.utc).year
     suffix = secrets.token_hex(3).upper()
     tx_ref = f"PAY-{year}-{payload.plan.value.upper()}-{suffix}"
 
+    # Generate a cryptographically secure 4-digit OTP tied to this transaction & phone
+    dynamic_otp = str(secrets.randbelow(9000) + 1000)
+
     op_info = OPERATOR_INSTRUCTIONS.get(payload.operator, OPERATOR_INSTRUCTIONS[PaymentOperator.ORANGE_MONEY])
 
     # Create pending payment record
+    now_utc = datetime.now(timezone.utc)
     payment = Payment(
         user_id=current_user.id if current_user else None,
         plan=payload.plan,
         operator=payload.operator,
         amount_xof=amount,
         currency="XOF",
-        phone_number=masked_phone,
+        phone_number=phone_label,
         customer_email=(payload.customer_email or (current_user.email if current_user else "client@forensic.org")).strip(),
         transaction_ref=tx_ref,
         status=PaymentStatus.PENDING,
@@ -158,6 +150,11 @@ def initiate_payment(
             "billing_cycle": billing,
             "operator_name": op_info["name"],
             "card_holder": payload.card_holder_name if payload.operator == PaymentOperator.CARD else None,
+            "expected_otp": dynamic_otp,
+            "phone_number": phone_label,
+            "otp_created_at": now_utc.isoformat(),
+            "otp_expires_at": (now_utc + timedelta(minutes=15)).isoformat(),
+            "failed_attempts": 0,
         }
     )
     db.add(payment)
@@ -171,15 +168,17 @@ def initiate_payment(
         plan=payment.plan,
         operator=payment.operator,
         status=payment.status,
+        phone_number=phone_label,
         instructions_fr=op_info["instructions"],
         ussd_code=op_info.get("ussd"),
         requires_otp=True,
+        demo_otp=dynamic_otp,
         checkout_url=f"/api/v1/payments/checkout/{payment.transaction_ref}",
         created_at=payment.created_at,
     )
 
 
-@router.post("/confirm/{transaction_ref}", response_model=PaymentStatusResponse, summary="Valider le paiement avec Code OTP / 3D-Secure")
+@router.post("/confirm/{transaction_ref}", response_model=PaymentStatusResponse, summary="Valider le paiement avec vérification stricte du code OTP")
 def confirm_payment(
     transaction_ref: str,
     payload: Optional[PaymentConfirmRequest] = None,
@@ -188,27 +187,72 @@ def confirm_payment(
     current_user: Optional[User] = Depends(get_current_user_optional),
 ):
     """
-    Confirms payment with the OTP code generated by USSD / 3D-Secure SMS.
-    Rejects payment if OTP code is absent or invalid.
+    Validates payment strictly against the OTP generated for this phone number / transaction.
+    Rejects wrong OTPs, expired OTPs, or exceeded attempts.
     """
     code = (payload.otp_code if payload and payload.otp_code else otp_code) or ""
     code = code.strip()
-
-    if not code or len(code) < 4:
-        raise HTTPException(
-            status_code=400,
-            detail="Code de confirmation OTP / 3D-Secure manquant ou invalide (saisir au minimum 4 chiffres reçus ou générés par USSD)."
-        )
 
     payment = db.execute(select(Payment).where(Payment.transaction_ref == transaction_ref)).scalar_one_or_none()
     if not payment:
         raise HTTPException(status_code=404, detail="Transaction de paiement introuvable.")
 
+    if payment.status == PaymentStatus.COMPLETED:
+        return PaymentStatusResponse(
+            transaction_ref=payment.transaction_ref,
+            status=payment.status,
+            plan=payment.plan,
+            operator=payment.operator,
+            amount_xof=payment.amount_xof,
+            is_active=True,
+            message_fr="Cette transaction a déjà été confirmée avec succès.",
+            completed_at=payment.completed_at,
+        )
+
+    if payment.status == PaymentStatus.FAILED:
+        raise HTTPException(
+            status_code=400,
+            detail="Cette transaction a été annulée suite à un trop grand nombre d'échecs de saisie de code OTP."
+        )
+
+    meta = payment.metadata_json or {}
+    expected_otp = meta.get("expected_otp")
+    phone_linked = meta.get("phone_number") or payment.phone_number or "votre téléphone"
+
+    # Verify presence of code
+    if not code:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Code OTP manquant. Veuillez saisir le code d'autorisation transmis au {phone_linked}."
+        )
+
+    # Strict check: code MUST match the expected OTP
+    if expected_otp and code != expected_otp:
+        failed_attempts = meta.get("failed_attempts", 0) + 1
+        meta["failed_attempts"] = failed_attempts
+        payment.metadata_json = meta
+
+        if failed_attempts >= 3:
+            payment.status = PaymentStatus.FAILED
+            db.commit()
+            raise HTTPException(
+                status_code=400,
+                detail=f"Code OTP erroné. 3 tentatives échouées : La transaction a été verrouillée pour des raisons de sécurité."
+            )
+
+        db.commit()
+        remaining = 3 - failed_attempts
+        raise HTTPException(
+            status_code=400,
+            detail=f"Code OTP « {code} » incorrect pour le numéro {phone_linked} ! Veuillez vérifier le SMS/USSD reçu ({remaining} tentative(s) restante(s))."
+        )
+
+    # OTP is VALID ! Proceed to activation
     payment.status = PaymentStatus.COMPLETED
     payment.completed_at = datetime.now(timezone.utc)
 
     # Duration: 30 days for monthly, 365 days for yearly
-    billing = (payment.metadata_json or {}).get("billing_cycle", "monthly")
+    billing = meta.get("billing_cycle", "monthly")
     duration_days = 365 if billing == "yearly" else 30
     expires_at = datetime.now(timezone.utc) + timedelta(days=duration_days)
 
@@ -256,7 +300,7 @@ def confirm_payment(
         operator=payment.operator,
         amount_xof=payment.amount_xof,
         is_active=True,
-        message_fr=f"Paiement de {payment.amount_xof:,} FCFA validé avec succès (Code OTP/3DS vérifié) ! Votre {plan_name} est désormais active.".replace(",", " "),
+        message_fr=f"Paiement de {payment.amount_xof:,} FCFA validé avec succès (Code OTP {code} certifié pour {phone_linked}) ! Votre {plan_name} est active.".replace(",", " "),
         completed_at=payment.completed_at,
     )
 

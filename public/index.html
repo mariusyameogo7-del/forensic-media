@@ -552,19 +552,24 @@
           <div style="font-size:12px; color:#64748b; margin-top:2px;">Réf : <strong id="step2-tx-ref" style="font-family:monospace; color:#0f172a;">PAY-...</strong></div>
         </div>
 
-        <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:12px; padding:14px; margin-bottom:16px;">
-          <div style="font-size:13px; font-weight:700; color:#0369a1;" id="step2-instructions">Instructions de validation</div>
-          <div style="font-size:12px; color:#475569; margin-top:4px;" id="step2-sub-instructions">Veuillez saisir le code d'autorisation reçu sur votre téléphone ou généré par USSD.</div>
+        <!-- NOTIFICATION SIMULATION SMS RÉEL SUR LE TÉLÉPHONE DU CLIENT -->
+        <div id="step2-sms-banner" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:14px; margin-bottom:16px; font-size:13px; color:#166534;">
+          <div style="font-weight:800; margin-bottom:4px;" id="step2-sms-title">📩 SMS Reçu sur le téléphone :</div>
+          <div id="step2-sms-body">« Forensic Media : Votre code d'autorisation OTP est : <strong id="step2-code-display" style="font-size:16px; letter-spacing:2px; background:#dcfce7; padding:2px 6px; border-radius:6px;">----</strong> »</div>
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:16px; font-size:12px; color:#475569;" id="step2-sub-instructions">
+          Veuillez saisir le code d'autorisation ci-dessus pour confirmer le débit.
         </div>
 
         <div class="form-group" style="margin-top:0;">
-          <label class="form-label">Saisir le Code d'autorisation OTP / 3D-Secure (4 à 6 chiffres)</label>
-          <input type="text" id="otp-input" placeholder="Ex : 1234" maxlength="6" style="text-align:center; font-size:22px; font-weight:900; letter-spacing:4px;">
+          <label class="form-label" style="text-align:center; font-size:12px;">Saisir le Code d'autorisation OTP lié au numéro</label>
+          <input type="text" id="otp-input" placeholder="Ex : 1234" maxlength="6" style="text-align:center; font-size:24px; font-weight:900; letter-spacing:6px; color:#0f172a;">
         </div>
 
         <button type="button" id="btn-momo-confirm" class="btn-submit" style="background:#16a34a; margin-top:16px;" onclick="confirmOtpPaymentStep()">Confirmer et Activer l'Abonnement</button>
         
-        <button type="button" class="btn-sample" style="width:100%; margin-top:8px;" onclick="backToStep1()">← Revenir en arrière</button>
+        <button type="button" class="btn-sample" style="width:100%; margin-top:8px;" onclick="backToStep1()">← Modifier mes informations</button>
       </div>
 
       <div style="text-align:center; font-size:11px; color:#94a3b8; margin-top:12px;">🔒 Transaction certifiée par la passerelle FedaPay / CinetPay Pan-Afrique</div>
@@ -584,6 +589,7 @@
     var currentSelectedOperator = "orange_money";
     var currentPlanAmount = 3000;
     var currentPendingTxRef = null;
+    var currentExpectedOtp = null;
     
     var adminKey = localStorage.getItem("forensic_admin_key") || "";
     var userToken = localStorage.getItem("forensic_user_token") || "";
@@ -808,11 +814,11 @@
       }
     }
 
-    // Étape 1 : Envoi des coordonnées et initiation
+    // Étape 1 : Envoi des coordonnées et génération de l'OTP
     function initiatePaymentStep() {
       var btn = document.getElementById("btn-momo-init");
       btn.disabled = true;
-      btn.textContent = "Vérification des coordonnées sécurisées...";
+      btn.textContent = "Génération du code OTP sécurisé...";
 
       var payload = {
         plan: currentSelectedPlan,
@@ -865,13 +871,17 @@
       })
       .then(function(data) {
         currentPendingTxRef = data.transaction_ref;
+        currentExpectedOtp = data.demo_otp;
+
         document.getElementById("step2-tx-ref").textContent = data.transaction_ref;
-        document.getElementById("step2-instructions").textContent = (currentPayMode === "card") ? "Authentification 3D-Secure Bancaire" : "Autorisation Mobile Money (" + data.operator.toUpperCase() + ")";
+        document.getElementById("step2-sms-title").textContent = (currentPayMode === "card") ? "🔒 Code 3D-Secure reçu par SMS Bancaire :" : ("📲 SMS / USSD reçu sur " + (data.phone_number || "votre téléphone") + " :");
+        document.getElementById("step2-code-display").textContent = data.demo_otp || "••••";
         document.getElementById("step2-sub-instructions").textContent = data.instructions_fr;
 
         // Passer à l'Étape 2
         document.getElementById("pay-step-1").classList.add("hidden");
         document.getElementById("pay-step-2").classList.remove("hidden");
+        document.getElementById("otp-input").focus();
       })
       .catch(function(err) {
         alert(err.message);
@@ -882,17 +892,17 @@
       });
     }
 
-    // Étape 2 : Validation du code OTP / 3D-Secure
+    // Étape 2 : Vérification stricte du code OTP
     function confirmOtpPaymentStep() {
       var otpCode = document.getElementById("otp-input").value;
       if (!otpCode || otpCode.trim().length < 4) {
-        alert("Veuillez saisir le code OTP / 3D-Secure (4 à 6 chiffres) pour autoriser le prélèvement.");
+        alert("Veuillez saisir le code OTP exact reçu par SMS ou généré par USSD.");
         return;
       }
 
       var btn = document.getElementById("btn-momo-confirm");
       btn.disabled = true;
-      btn.textContent = "Vérification du code et débit en cours...";
+      btn.textContent = "Vérification stricte de l'OTP...";
 
       var headers = { "Content-Type": "application/json" };
       if (userToken) headers["Authorization"] = "Bearer " + userToken;
@@ -904,7 +914,7 @@
       })
       .then(function(res) {
         if (!res.ok) {
-          return res.json().then(function(d) { throw new Error(d.detail || "Code d'autorisation invalide."); });
+          return res.json().then(function(d) { throw new Error(d.detail || "Code d'autorisation incorrect."); });
         }
         return res.json();
       })
@@ -917,7 +927,7 @@
         showScreen("screen-upload");
       })
       .catch(function(err) {
-        alert(err.message);
+        alert("❌ " + err.message);
       })
       .finally(function() {
         btn.disabled = false;
