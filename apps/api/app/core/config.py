@@ -18,6 +18,7 @@ try:
         PROJECT_NAME: str = "Plateforme africaine de vérification numérique"
         API_V1_STR: str = "/api/v1"
         SECRET_KEY: str = os.getenv("SECRET_KEY", "replace-with-a-secure-random-secret-key-in-production")
+        ADMIN_SECRET_KEY: str = os.getenv("ADMIN_SECRET_KEY", "forensic_admin_2026")
 
         FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
         CORS_ORIGINS: List[str] = [
@@ -59,6 +60,7 @@ except ImportError:
         PROJECT_NAME: str = "Plateforme africaine de vérification numérique"
         API_V1_STR: str = "/api/v1"
         SECRET_KEY: str = os.getenv("SECRET_KEY", "replace-with-a-secure-random-secret-key-in-production")
+        ADMIN_SECRET_KEY: str = os.getenv("ADMIN_SECRET_KEY", "forensic_admin_2026")
 
         FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
         CORS_ORIGINS: List[str] = [
