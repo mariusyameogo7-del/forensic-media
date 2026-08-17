@@ -301,18 +301,32 @@ class AnalysisService:
                     iso_val = int(iso_raw)
 
             exp_val = raw_m.get("exposure_time") or raw_m.get("ExposureTime")
-            f_num = raw_m.get("f_number") or raw_m.get("FNumber")
-            foc_len = raw_m.get("focal_length") or raw_m.get("FocalLength")
+            
+            f_num_val = None
+            try:
+                f_raw = raw_m.get("f_number") or raw_m.get("FNumber")
+                if f_raw is not None:
+                    f_num_val = float(str(f_raw).replace("/", ".").split()[0])
+            except Exception:
+                f_num_val = None
+
+            foc_len_val = None
+            try:
+                foc_raw = raw_m.get("focal_length") or raw_m.get("FocalLength")
+                if foc_raw is not None:
+                    foc_len_val = float(str(foc_raw).replace("/", ".").split()[0])
+            except Exception:
+                foc_len_val = None
 
             camera_metadata = CameraMetadataDetails(
                 make=m.make or raw_m.get("make") or raw_m.get("Make"),
                 model=m.model or raw_m.get("model") or raw_m.get("Model"),
                 software=m.software or raw_m.get("software") or raw_m.get("Software"),
                 lens_model=lens,
-                iso=iso_val,
+                iso=iso_val if isinstance(iso_val, int) else None,
                 exposure_time=str(exp_val) if exp_val else None,
-                f_number=float(f_num) if f_num else None,
-                focal_length=float(foc_len) if foc_len else None,
+                f_number=f_num_val,
+                focal_length=foc_len_val,
                 date_time_original=m.original_date,
                 has_gps=m.has_gps or False,
                 raw_details=raw_m,
@@ -371,7 +385,7 @@ class AnalysisService:
                 claim_generator=c.claim_generator,
                 digital_source_type=c.digital_source_type,
                 ai_declared=c.ai_declared,
-                cert_info=c.raw_payload,
+                cert_info=getattr(c, "manifest_data", None) or getattr(c, "raw_payload", None),
             )
 
         if analysis.ai_result:
