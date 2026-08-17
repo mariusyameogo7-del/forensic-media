@@ -1,9 +1,11 @@
 import os
+import traceback
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from apps.api.app.core.config import settings
+from apps.api.app.core.errors import AppError
 from apps.api.app.api.v1.router import api_router
 
 app = FastAPI(
@@ -23,6 +25,30 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(AppError)
+async def app_error_handler(request: Request, exc: AppError):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error_code": exc.code,
+            "message": exc.message,
+            "details": exc.details,
+        },
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    tb = traceback.format_exc()
+    print(f"[GLOBAL SERVER ERROR] {exc}\n{tb}")
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": str(exc),
+            "traceback": tb.splitlines()[-3:] if settings.DEBUG else [str(exc)],
+        },
+    )
 
 # Include API v1 routes
 app.include_router(api_router, prefix=settings.API_V1_STR)

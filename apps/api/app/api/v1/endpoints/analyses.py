@@ -102,7 +102,7 @@ def get_analysis_progress(
 
     total_runs = len(analysis.engine_runs)
     completed_runs = sum(
-        1 for r in analysis.engine_runs if r.status.value in ("completed", "failed", "skipped")
+        1 for r in analysis.engine_runs if getattr(r.status, "value", str(r.status)) in ("completed", "failed", "skipped")
     )
     progress_percent = int((completed_runs / total_runs) * 100) if total_runs > 0 else 0
 
